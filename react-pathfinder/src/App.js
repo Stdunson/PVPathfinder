@@ -2,8 +2,83 @@ import React, { useState } from 'react';
 import './App.css';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
+import Select from 'react-select';
 
 const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+
+// Major options for searchable dropdown
+const majorOptions = [
+  { value: 'Computer Science', label: 'Computer Science' },
+  { value: 'Computer Engineering', label: 'Computer Engineering' },
+  { value: 'Electrical Engineering', label: 'Electrical Engineering' },
+  { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
+  { value: 'Civil Engineering', label: 'Civil Engineering' },
+  { value: 'Chemical Engineering', label: 'Chemical Engineering' },
+  { value: 'Architecture', label: 'Architecture' },
+  { value: 'Biology', label: 'Biology' },
+  { value: 'Chemistry', label: 'Chemistry' },
+  { value: 'Physics', label: 'Physics' },
+  { value: 'Mathematics', label: 'Mathematics' },
+  { value: 'Business Administration', label: 'Business Administration' },
+  { value: 'Accounting', label: 'Accounting' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Management', label: 'Management' },
+  { value: 'Economics', label: 'Economics' },
+  { value: 'Nursing', label: 'Nursing' },
+  { value: 'Psychology', label: 'Psychology' },
+  { value: 'Sociology', label: 'Sociology' },
+  { value: 'Criminal Justice', label: 'Criminal Justice' },
+  { value: 'Political Science', label: 'Political Science' },
+  { value: 'English', label: 'English' },
+  { value: 'History', label: 'History' },
+  { value: 'Communication', label: 'Communication' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Social Work', label: 'Social Work' }
+];
+
+// Minor options for searchable dropdown
+const minorOptions = [
+  { value: 'Business', label: 'Business' },
+  { value: 'Mathematics', label: 'Mathematics' },
+  { value: 'Computer Science', label: 'Computer Science' },
+  { value: 'Psychology', label: 'Psychology' },
+  { value: 'Chemistry', label: 'Chemistry' },
+  { value: 'Biology', label: 'Biology' },
+  { value: 'Physics', label: 'Physics' },
+  { value: 'English', label: 'English' },
+  { value: 'History', label: 'History' },
+  { value: 'Political Science', label: 'Political Science' },
+  { value: 'Communication', label: 'Communication' },
+  { value: 'Sociology', label: 'Sociology' },
+  { value: 'Spanish', label: 'Spanish' },
+  { value: 'French', label: 'French' },
+  { value: 'Art', label: 'Art' },
+  { value: 'Music', label: 'Music' },
+  { value: 'Philosophy', label: 'Philosophy' },
+  { value: 'Criminal Justice', label: 'Criminal Justice' },
+  { value: 'Economics', label: 'Economics' },
+  { value: 'Statistics', label: 'Statistics' }
+];
+
+// Graduation semester options
+const graduationOptions = [
+  { value: 'Spring 2025', label: 'Spring 2025' },
+  { value: 'Summer 2025', label: 'Summer 2025' },
+  { value: 'Fall 2025', label: 'Fall 2025' },
+  { value: 'Spring 2026', label: 'Spring 2026' },
+  { value: 'Summer 2026', label: 'Summer 2026' },
+  { value: 'Fall 2026', label: 'Fall 2026' },
+  { value: 'Spring 2027', label: 'Spring 2027' },
+  { value: 'Summer 2027', label: 'Summer 2027' },
+  { value: 'Fall 2027', label: 'Fall 2027' },
+  { value: 'Spring 2028', label: 'Spring 2028' },
+  { value: 'Summer 2028', label: 'Summer 2028' },
+  { value: 'Fall 2028', label: 'Fall 2028' },
+  { value: 'Spring 2029', label: 'Spring 2029' },
+  { value: 'Summer 2029', label: 'Summer 2029' },
+  { value: 'Fall 2029', label: 'Fall 2029' }
+];
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -127,6 +202,13 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
     }));
   };
 
+  const handleSelectChange = (name, selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: selectedOption ? selectedOption.value : ''
+    }));
+  };
+
   const handleCourseInputChange = (e) => {
     const { name, value } = e.target;
     setNewCourse(prev => ({
@@ -209,37 +291,15 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
 
         <div className="form-group">
           <label className="form-label">Major</label>
-          <input
-            type="text"
+          <Select
             name="major"
-            value={formData.major}
-            onChange={handleInputChange}
-            className="form-input"
-            placeholder="e.g., Computer Science"
-            list="major-options"
+            value={majorOptions.find(option => option.value === formData.major) || null}
+            onChange={(option) => handleSelectChange('major', option)}
+            options={majorOptions}
+            placeholder="Search or select your major..."
+            isClearable
+            isSearchable
           />
-          <datalist id="major-options">
-            <option value="Computer Science" />
-            <option value="Computer Engineering" />
-            <option value="Electrical Engineering" />
-            <option value="Mechanical Engineering" />
-            <option value="Civil Engineering" />
-            <option value="Chemical Engineering" />
-            <option value="Biology" />
-            <option value="Chemistry" />
-            <option value="Physics" />
-            <option value="Mathematics" />
-            <option value="Business Administration" />
-            <option value="Accounting" />
-            <option value="Finance" />
-            <option value="Marketing" />
-            <option value="Nursing" />
-            <option value="Psychology" />
-            <option value="Criminal Justice" />
-            <option value="English" />
-            <option value="History" />
-            <option value="Political Science" />
-          </datalist>
         </div>
 
         <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
@@ -259,46 +319,29 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
         {formData.hasDualMajor && (
           <div className="form-group">
             <label className="form-label">Second Major</label>
-            <input
-              type="text"
+            <Select
               name="major2"
-              value={formData.major2}
-              onChange={handleInputChange}
-              className="form-input"
-              placeholder="e.g., Mathematics"
-              list="major-options"
+              value={majorOptions.find(option => option.value === formData.major2) || null}
+              onChange={(option) => handleSelectChange('major2', option)}
+              options={majorOptions}
+              placeholder="Search or select your second major..."
+              isClearable
+              isSearchable
             />
           </div>
         )}
 
         <div className="form-group">
           <label className="form-label">Minor (Optional)</label>
-          <input
-            type="text"
+          <Select
             name="minor"
-            value={formData.minor}
-            onChange={handleInputChange}
-            className="form-input"
-            placeholder="e.g., Business"
-            list="minor-options"
+            value={minorOptions.find(option => option.value === formData.minor) || null}
+            onChange={(option) => handleSelectChange('minor', option)}
+            options={minorOptions}
+            placeholder="Search or select your minor..."
+            isClearable
+            isSearchable
           />
-          <datalist id="minor-options">
-            <option value="Business" />
-            <option value="Mathematics" />
-            <option value="Computer Science" />
-            <option value="Psychology" />
-            <option value="Chemistry" />
-            <option value="Biology" />
-            <option value="Physics" />
-            <option value="English" />
-            <option value="History" />
-            <option value="Political Science" />
-            <option value="Communication" />
-            <option value="Sociology" />
-            <option value="Spanish" />
-            <option value="Art" />
-            <option value="Music" />
-          </datalist>
         </div>
 
         <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
@@ -318,43 +361,29 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
         {formData.hasDualMinor && (
           <div className="form-group">
             <label className="form-label">Second Minor</label>
-            <input
-              type="text"
+            <Select
               name="minor2"
-              value={formData.minor2}
-              onChange={handleInputChange}
-              className="form-input"
-              placeholder="e.g., Psychology"
-              list="minor-options"
+              value={minorOptions.find(option => option.value === formData.minor2) || null}
+              onChange={(option) => handleSelectChange('minor2', option)}
+              options={minorOptions}
+              placeholder="Search or select your second minor..."
+              isClearable
+              isSearchable
             />
           </div>
         )}
 
         <div className="form-group">
           <label className="form-label">Expected Graduation</label>
-          <select
+          <Select
             name="expectedGraduation"
-            value={formData.expectedGraduation}
-            onChange={handleInputChange}
-            className="form-select"
-          >
-            <option value="">Select graduation semester</option>
-            <option value="Spring 2025">Spring 2025</option>
-            <option value="Summer 2025">Summer 2025</option>
-            <option value="Fall 2025">Fall 2025</option>
-            <option value="Spring 2026">Spring 2026</option>
-            <option value="Summer 2026">Summer 2026</option>
-            <option value="Fall 2026">Fall 2026</option>
-            <option value="Spring 2027">Spring 2027</option>
-            <option value="Summer 2027">Summer 2027</option>
-            <option value="Fall 2027">Fall 2027</option>
-            <option value="Spring 2028">Spring 2028</option>
-            <option value="Summer 2028">Summer 2028</option>
-            <option value="Fall 2028">Fall 2028</option>
-            <option value="Spring 2029">Spring 2029</option>
-            <option value="Summer 2029">Summer 2029</option>
-            <option value="Fall 2029">Fall 2029</option>
-          </select>
+            value={graduationOptions.find(option => option.value === formData.expectedGraduation) || null}
+            onChange={(option) => handleSelectChange('expectedGraduation', option)}
+            options={graduationOptions}
+            placeholder="Select graduation semester..."
+            isClearable
+            isSearchable
+          />
         </div>
 
         <div className="form-group">
