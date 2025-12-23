@@ -3,6 +3,8 @@ import './App.css';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'profile', label: 'My Profile', icon: '📝' },
@@ -34,243 +36,6 @@ function Sidebar({ currentPage, onNavigate }) {
   );
 }
 
-function Recommendations({ profileData, onNavigate }) {
-  const [loading, setLoading] = useState(false);
-  const [recommendations, setRecommendations] = useState(null);
-  const [error, setError] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
-
-  const API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
-
-  const getRecommendations = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-      // Build courses list from profile data
-      const coursesList = profileData.courses && profileData.courses.length > 0
-        ? profileData.courses.map(c => 
-            `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
-          ).join('\n')
-        : '  - No courses completed yet';
-
-      // Build dynamic prompt with actual student data
-      const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
-      
-A student needs course recommendations for the next semester. Here is their information:
-
-- Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}
-- Minor: ${profileData.minor || 'None'}
-- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
-- Minimum Credits per Semester: ${profileData.minCredits || 'Not specified'}
-- Additional Notes: ${profileData.additionalNotes || 'None'}
-- Completed Courses: 
-${coursesList}
-- Total Credits Earned: ${profileData.totalCredits || 0}
-
-Based on this information, please:
-1. Recommend 4-5 courses for the next semester
-2. Explain why each course is recommended
-3. Ensure prerequisites are met based on their completed courses
-4. Consider their graduation timeline
-5. Balance the course load to meet their minimum credit requirement
-6. If they have additional notes (like scholarship requirements), consider those
-
-Format your response in a clear, organized way with proper headings and sections.`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      setRecommendations(text);
-      setChatMessages([]); // Reset chat when new recommendations are generated
-    } catch (err) {
-      setError('Failed to get recommendations. Please check your API key and try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChatSend = async () => {
-    if (!chatInput.trim()) return;
-
-    const userMessage = chatInput.trim();
-    setChatInput('');
-    
-    // Add user message to chat
-    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
-    setChatLoading(true);
-
-    try {
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-      // Build context with profile, recommendations, and chat history
-      const coursesList = profileData.courses && profileData.courses.length > 0
-        ? profileData.courses.map(c => 
-            `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
-          ).join('\n')
-        : '  - No courses completed yet';
-
-      const chatHistory = chatMessages.map(msg => 
-        `${msg.role === 'user' ? 'Student' : 'Advisor'}: ${msg.text}`
-      ).join('\n');
-
-      const chatPrompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
-
-Student Profile:
-- Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}
-- Minor: ${profileData.minor || 'None'}
-- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
-- Minimum Credits per Semester: ${profileData.minCredits || 'Not specified'}
-- Completed Courses:
-${coursesList}
-
-Your previous recommendations:
-${recommendations}
-
-Chat History:
-${chatHistory}
-
-Student's new question: ${userMessage}
-
-Provide a helpful, conversational response to their question. Keep it concise and relevant to their academic planning. Be friendly and supportive.`;
-
-      const result = await model.generateContent(chatPrompt);
-      const response = await result.response;
-      const text = response.text();
-
-      setChatMessages(prev => [...prev, { role: 'ai', text }]);
-    } catch (err) {
-      setChatMessages(prev => [...prev, { 
-        role: 'ai', 
-        text: 'Sorry, I encountered an error. Please try again.' 
-      }]);
-      console.error(err);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleChatSend();
-    }
-  };
-
-  return (
-    <div className="recommendations-container">
-      {!profileData ? (
-        <div className="recommendations-intro">
-          <h3 className="recommendations-title">Profile Required</h3>
-          <p className="recommendations-description">
-            Please complete your student profile first so we can provide personalized course recommendations.
-          </p>
-          <button onClick={() => onNavigate('profile')} className="primary-button">
-            Go to Profile
-          </button>
-        </div>
-      ) : !recommendations && !loading ? (
-        <div className="recommendations-intro">
-          <h3 className="recommendations-title">Get AI-Powered Course Recommendations</h3>
-          <p className="recommendations-description">
-            Our AI advisor will analyze your academic progress, major requirements, and graduation 
-            timeline to recommend the best courses for your next semester. Click the button below 
-            to get personalized recommendations.
-          </p>
-          <button onClick={getRecommendations} className="primary-button">
-            Get Recommendations
-          </button>
-          {error && (
-            <div className="error-container">
-              <p className="error-text">{error}</p>
-            </div>
-          )}
-        </div>
-      ) : null}
-
-      {loading && (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Analyzing your profile and generating recommendations...</p>
-        </div>
-      )}
-
-      {recommendations && !loading && (
-        <div className="recommendations-results">
-          <div className="results-header">
-            <h3 className="results-title">Your Course Recommendations</h3>
-            <button onClick={getRecommendations} className="regenerate-button">
-              Regenerate
-            </button>
-          </div>
-          <div className="recommendations-content">
-            <ReactMarkdown>{recommendations}</ReactMarkdown>
-          </div>
-
-          {/* Chat Interface */}
-          <div className="chat-container">
-            <h4 className="chat-title">Have questions about these recommendations? 💬</h4>
-            
-            {chatMessages.length > 0 && (
-              <div className="chat-messages">
-                {chatMessages.map((msg, index) => (
-                  <div key={index} className={`chat-message ${msg.role}`}>
-                    <div className="chat-message-label">
-                      {msg.role === 'user' ? 'You' : 'AI Advisor'}
-                    </div>
-                    <div className="chat-message-text">
-                      {msg.role === 'user' ? msg.text : <ReactMarkdown>{msg.text}</ReactMarkdown>}
-                    </div>
-                  </div>
-                ))}
-                {chatLoading && (
-                  <div className="chat-loading">
-                    <span>AI Advisor is thinking</span>
-                    <div className="chat-loading-dots">
-                      <div className="chat-loading-dot"></div>
-                      <div className="chat-loading-dot"></div>
-                      <div className="chat-loading-dot"></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="chat-input-container">
-              <input
-                type="text"
-                className="chat-input"
-                placeholder="Ask a question about your recommendations..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={chatLoading}
-              />
-              <button 
-                className="chat-send-button"
-                onClick={handleChatSend}
-                disabled={chatLoading || !chatInput.trim()}
-              >
-                {chatLoading ? 'Sending...' : 'Send'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function Header({ title }) {
   return (
     <header className="header">
@@ -282,12 +47,13 @@ function Header({ title }) {
 function Dashboard({ onNavigate, profileData }) {
   const coursesCompleted = profileData?.courses?.length || 0;
   const creditsEarned = profileData?.totalCredits || 0;
+  const firstName = profileData?.name ? profileData.name.split(' ')[0] : null;
   
   return (
     <div>
       <div className="welcome-card">
         <h3 className="welcome-title">
-          {profileData?.name ? `Welcome back, ${profileData.name}! 🎓` : 'Welcome to PV Pathfinder! 🎓'}
+          {firstName ? `Welcome back, ${firstName}! 🎓` : 'Welcome to PV Pathfinder! 🎓'}
         </h3>
         <p className="welcome-text">
           {profileData 
@@ -332,9 +98,12 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
   const [formData, setFormData] = useState({
     name: existingProfile?.name || '',
     major: existingProfile?.major || '',
+    major2: existingProfile?.major2 || '',
     minor: existingProfile?.minor || '',
+    minor2: existingProfile?.minor2 || '',
+    hasDualMajor: existingProfile?.hasDualMajor || false,
+    hasDualMinor: existingProfile?.hasDualMinor || false,
     expectedGraduation: existingProfile?.expectedGraduation || '',
-    minCredits: existingProfile?.minCredits || '',
     additionalNotes: existingProfile?.additionalNotes || ''
   });
 
@@ -351,10 +120,10 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
   const [saved, setSaved] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -369,13 +138,11 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
   const addCourse = () => {
     if (newCourse.code && newCourse.name && newCourse.credits) {
       if (editingCourse !== null) {
-        // Update existing course
         setCourses(prev => prev.map((course, idx) => 
           idx === editingCourse ? { ...newCourse, id: course.id } : course
         ));
         setEditingCourse(null);
       } else {
-        // Add new course
         setCourses(prev => [...prev, { ...newCourse, id: Date.now() }]);
       }
       setNewCourse({ code: '', name: '', credits: '', semester: '', grade: '' });
@@ -440,73 +207,154 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
           />
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Major</label>
-            <select
-              name="major"
-              value={formData.major}
-              onChange={handleInputChange}
-              className="form-select"
-            >
-              <option value="">Select your major</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Biology">Biology</option>
-              <option value="Business">Business</option>
-              <option value="Nursing">Nursing</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Minor (Optional)</label>
-            <input
-              type="text"
-              name="minor"
-              value={formData.minor}
-              onChange={handleInputChange}
-              className="form-input"
-              placeholder="Enter your minor"
-            />
-          </div>
+        <div className="form-group">
+          <label className="form-label">Major</label>
+          <input
+            type="text"
+            name="major"
+            value={formData.major}
+            onChange={handleInputChange}
+            className="form-input"
+            placeholder="e.g., Computer Science"
+            list="major-options"
+          />
+          <datalist id="major-options">
+            <option value="Computer Science" />
+            <option value="Computer Engineering" />
+            <option value="Electrical Engineering" />
+            <option value="Mechanical Engineering" />
+            <option value="Civil Engineering" />
+            <option value="Chemical Engineering" />
+            <option value="Biology" />
+            <option value="Chemistry" />
+            <option value="Physics" />
+            <option value="Mathematics" />
+            <option value="Business Administration" />
+            <option value="Accounting" />
+            <option value="Finance" />
+            <option value="Marketing" />
+            <option value="Nursing" />
+            <option value="Psychology" />
+            <option value="Criminal Justice" />
+            <option value="English" />
+            <option value="History" />
+            <option value="Political Science" />
+          </datalist>
         </div>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label className="form-label">Expected Graduation</label>
-            <select
-              name="expectedGraduation"
-              value={formData.expectedGraduation}
-              onChange={handleInputChange}
-              className="form-select"
-            >
-              <option value="">Select graduation semester</option>
-              <option value="Spring 2025">Spring 2025</option>
-              <option value="Summer 2025">Summer 2025</option>
-              <option value="Fall 2025">Fall 2025</option>
-              <option value="Spring 2026">Spring 2026</option>
-              <option value="Summer 2026">Summer 2026</option>
-              <option value="Fall 2026">Fall 2026</option>
-              <option value="Spring 2027">Spring 2027</option>
-              <option value="Summer 2027">Summer 2027</option>
-              <option value="Fall 2027">Fall 2027</option>
-              <option value="Spring 2028">Spring 2028</option>
-              <option value="Summer 2028">Summer 2028</option>
-              <option value="Fall 2028">Fall 2028</option>
-            </select>
-          </div>
+        <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+          <input
+            type="checkbox"
+            id="hasDualMajor"
+            name="hasDualMajor"
+            checked={formData.hasDualMajor}
+            onChange={handleInputChange}
+            style={{ width: 'auto', cursor: 'pointer' }}
+          />
+          <label htmlFor="hasDualMajor" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 'normal' }}>
+            I have a dual major
+          </label>
+        </div>
 
+        {formData.hasDualMajor && (
           <div className="form-group">
-            <label className="form-label">Minimum Credit Hours per Semester</label>
+            <label className="form-label">Second Major</label>
             <input
-              type="number"
-              name="minCredits"
-              value={formData.minCredits}
+              type="text"
+              name="major2"
+              value={formData.major2}
               onChange={handleInputChange}
               className="form-input"
-              placeholder="e.g., 12"
+              placeholder="e.g., Mathematics"
+              list="major-options"
             />
           </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label">Minor (Optional)</label>
+          <input
+            type="text"
+            name="minor"
+            value={formData.minor}
+            onChange={handleInputChange}
+            className="form-input"
+            placeholder="e.g., Business"
+            list="minor-options"
+          />
+          <datalist id="minor-options">
+            <option value="Business" />
+            <option value="Mathematics" />
+            <option value="Computer Science" />
+            <option value="Psychology" />
+            <option value="Chemistry" />
+            <option value="Biology" />
+            <option value="Physics" />
+            <option value="English" />
+            <option value="History" />
+            <option value="Political Science" />
+            <option value="Communication" />
+            <option value="Sociology" />
+            <option value="Spanish" />
+            <option value="Art" />
+            <option value="Music" />
+          </datalist>
+        </div>
+
+        <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
+          <input
+            type="checkbox"
+            id="hasDualMinor"
+            name="hasDualMinor"
+            checked={formData.hasDualMinor}
+            onChange={handleInputChange}
+            style={{ width: 'auto', cursor: 'pointer' }}
+          />
+          <label htmlFor="hasDualMinor" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 'normal' }}>
+            I have a second minor
+          </label>
+        </div>
+
+        {formData.hasDualMinor && (
+          <div className="form-group">
+            <label className="form-label">Second Minor</label>
+            <input
+              type="text"
+              name="minor2"
+              value={formData.minor2}
+              onChange={handleInputChange}
+              className="form-input"
+              placeholder="e.g., Psychology"
+              list="minor-options"
+            />
+          </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label">Expected Graduation</label>
+          <select
+            name="expectedGraduation"
+            value={formData.expectedGraduation}
+            onChange={handleInputChange}
+            className="form-select"
+          >
+            <option value="">Select graduation semester</option>
+            <option value="Spring 2025">Spring 2025</option>
+            <option value="Summer 2025">Summer 2025</option>
+            <option value="Fall 2025">Fall 2025</option>
+            <option value="Spring 2026">Spring 2026</option>
+            <option value="Summer 2026">Summer 2026</option>
+            <option value="Fall 2026">Fall 2026</option>
+            <option value="Spring 2027">Spring 2027</option>
+            <option value="Summer 2027">Summer 2027</option>
+            <option value="Fall 2027">Fall 2027</option>
+            <option value="Spring 2028">Spring 2028</option>
+            <option value="Summer 2028">Summer 2028</option>
+            <option value="Fall 2028">Fall 2028</option>
+            <option value="Spring 2029">Spring 2029</option>
+            <option value="Summer 2029">Summer 2029</option>
+            <option value="Fall 2029">Fall 2029</option>
+          </select>
         </div>
 
         <div className="form-group">
@@ -517,7 +365,7 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
             value={formData.additionalNotes}
             onChange={handleInputChange}
             className="form-input"
-            placeholder="Scholarship requirements, work schedule, etc."
+            placeholder="Scholarship requirements, preferred schedule, etc."
           />
         </div>
       </div>
@@ -666,11 +514,398 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
   );
 }
 
+function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGenerate, isLoading }) {
+  const [recommendations, setRecommendations] = useState(savedData?.recommendations || null);
+  const [chatMessages, setChatMessages] = useState(savedData?.chatMessages || []);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (savedData?.recommendations) {
+      setRecommendations(savedData.recommendations);
+      setChatMessages(savedData.chatMessages || []);
+    }
+  }, [savedData]);
+
+  const handleChatSend = async () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = chatInput.trim();
+    setChatInput('');
+    
+    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setChatLoading(true);
+
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+      const coursesList = profileData.courses && profileData.courses.length > 0
+        ? profileData.courses.map(c => 
+            `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
+          ).join('\n')
+        : '  - No courses completed yet';
+
+      const chatHistory = chatMessages.map(msg => 
+        `${msg.role === 'user' ? 'Student' : 'Advisor'}: ${msg.text}`
+      ).join('\n');
+
+      const chatPrompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
+
+Student Profile:
+- Name: ${profileData.name || 'Not provided'}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
+- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
+- Completed Courses:
+${coursesList}
+
+Your previous recommendations:
+${recommendations}
+
+Chat History:
+${chatHistory}
+
+Student's new question: ${userMessage}
+
+Provide a helpful, conversational response to their question. Keep it concise and relevant to their academic planning. Be friendly and supportive.`;
+
+      const result = await model.generateContent(chatPrompt);
+      const response = await result.response;
+      const text = response.text();
+
+      const updatedMessages = [...chatMessages, { role: 'ai', text }];
+      setChatMessages(updatedMessages);
+      onSaveData({ recommendations, chatMessages: updatedMessages });
+    } catch (err) {
+      setChatMessages(prev => [...prev, { 
+        role: 'ai', 
+        text: 'Sorry, I encountered an error. Please try again.' 
+      }]);
+      console.error(err);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleChatSend();
+    }
+  };
+
+  return (
+    <div className="recommendations-container">
+      {!profileData ? (
+        <div className="recommendations-intro">
+          <h3 className="recommendations-title">Profile Required</h3>
+          <p className="recommendations-description">
+            Please complete your student profile first so we can provide personalized course recommendations.
+          </p>
+          <button onClick={() => onNavigate('profile')} className="primary-button">
+            Go to Profile
+          </button>
+        </div>
+      ) : !recommendations && !isLoading ? (
+        <div className="recommendations-intro">
+          <h3 className="recommendations-title">Get AI-Powered Course Recommendations</h3>
+          <p className="recommendations-description">
+            Our AI advisor will analyze your academic progress, major requirements, and graduation 
+            timeline to recommend the best courses for your next semester. Click the button below 
+            to get personalized recommendations.
+          </p>
+          <button onClick={onGenerate} className="primary-button">
+            Get Recommendations
+          </button>
+        </div>
+      ) : null}
+
+      {isLoading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Analyzing your profile and generating recommendations...</p>
+        </div>
+      )}
+
+      {recommendations && !isLoading && (
+        <div className="recommendations-results">
+          <div className="results-header">
+            <h3 className="results-title">Your Course Recommendations</h3>
+            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading}>
+              Regenerate
+            </button>
+          </div>
+          <div className="recommendations-content">
+            <ReactMarkdown>{recommendations}</ReactMarkdown>
+          </div>
+
+          <div className="chat-container">
+            <h4 className="chat-title">Have questions about these recommendations? 💬</h4>
+            
+            {chatMessages.length > 0 && (
+              <div className="chat-messages">
+                {chatMessages.map((msg, index) => (
+                  <div key={index} className={`chat-message ${msg.role}`}>
+                    <div className="chat-message-label">
+                      {msg.role === 'user' ? 'You' : 'AI Advisor'}
+                    </div>
+                    <div className="chat-message-text">
+                      {msg.role === 'user' ? msg.text : <ReactMarkdown>{msg.text}</ReactMarkdown>}
+                    </div>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="chat-loading">
+                    <span>AI Advisor is thinking</span>
+                    <div className="chat-loading-dots">
+                      <div className="chat-loading-dot"></div>
+                      <div className="chat-loading-dot"></div>
+                      <div className="chat-loading-dot"></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="chat-input-container">
+              <input
+                type="text"
+                className="chat-input"
+                placeholder="Ask a question about your recommendations..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={chatLoading}
+              />
+              <button 
+                className="chat-send-button"
+                onClick={handleChatSend}
+                disabled={chatLoading || !chatInput.trim()}
+              >
+                {chatLoading ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, isLoading, hasRecommendations }) {
+  const [roadmap, setRoadmap] = useState(savedRoadmap || null);
+
+  React.useEffect(() => {
+    if (savedRoadmap) {
+      setRoadmap(savedRoadmap);
+    }
+  }, [savedRoadmap]);
+
+  return (
+    <div className="roadmap-container">
+      {!profileData ? (
+        <div className="roadmap-intro">
+          <h3 className="recommendations-title">Profile Required</h3>
+          <p className="recommendations-description">
+            Please complete your student profile first so we can create a personalized semester roadmap.
+          </p>
+          <button onClick={() => onNavigate('profile')} className="primary-button">
+            Go to Profile
+          </button>
+        </div>
+      ) : !hasRecommendations ? (
+        <div className="roadmap-intro">
+          <h3 className="recommendations-title">Recommendations Required</h3>
+          <p className="recommendations-description">
+            To ensure consistency in your academic plan, please generate your course recommendations first. 
+            The roadmap will build upon those recommendations to create a complete semester-by-semester plan.
+          </p>
+          <button onClick={() => onNavigate('recommendations')} className="primary-button">
+            Go to Recommendations
+          </button>
+        </div>
+      ) : !roadmap && !isLoading ? (
+        <div className="roadmap-intro">
+          <h3 className="recommendations-title">Generate Your Semester Roadmap</h3>
+          <p className="recommendations-description">
+            Get a complete semester-by-semester plan from now until graduation. Our AI will create 
+            a personalized roadmap showing exactly which courses to take each semester, considering 
+            prerequisites, your graduation timeline, and degree requirements.
+          </p>
+          <button onClick={onGenerate} className="primary-button">
+            Generate Roadmap
+          </button>
+        </div>
+      ) : null}
+
+      {isLoading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Creating your personalized roadmap...</p>
+        </div>
+      )}
+
+      {roadmap && !isLoading && (
+        <div className="roadmap-results">
+          <div className="results-header">
+            <h3 className="results-title">Your Semester Roadmap</h3>
+            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading}>
+              Regenerate
+            </button>
+          </div>
+          <div className="recommendations-content">
+            <ReactMarkdown>{roadmap}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [profileData, setProfileData] = useState(null);
+  const [savedRecommendations, setSavedRecommendations] = useState(null);
+  const [savedRoadmap, setSavedRoadmap] = useState(null);
+  const [isGeneratingRecommendations, setIsGeneratingRecommendations] = useState(false);
+  const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
+
+  const generateRecommendations = async () => {
+    if (!profileData) return;
+    
+    setIsGeneratingRecommendations(true);
+
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+      const coursesList = profileData.courses && profileData.courses.length > 0
+        ? profileData.courses.map(c => 
+            `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
+          ).join('\n')
+        : '  - No courses completed yet';
+
+      const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
+      
+A student needs course recommendations for the next semester. Here is their information:
+
+- Name: ${profileData.name || 'Not provided'}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
+- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
+- Additional Notes/Constraints: ${profileData.additionalNotes || 'None'}
+- Completed Courses: 
+${coursesList}
+- Total Credits Earned: ${profileData.totalCredits || 0}
+
+Based on this information, please:
+1. Recommend 4-5 courses for the next semester
+2. Explain why each course is recommended
+3. Ensure prerequisites are met based on their completed courses
+4. Consider their graduation timeline
+5. Balance the course load appropriately (typically 12-15 credits minimum for full-time students)
+6. If they have additional notes/constraints, factor those into your recommendations
+
+Format your response in a clear, organized way with proper headings and sections.`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      setSavedRecommendations({ recommendations: text, chatMessages: [] });
+    } catch (err) {
+      console.error('Failed to generate recommendations:', err);
+    } finally {
+      setIsGeneratingRecommendations(false);
+    }
+  };
+
+  const generateRoadmap = async () => {
+    if (!profileData) return;
+    
+    setIsGeneratingRoadmap(true);
+
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+      const coursesList = profileData.courses && profileData.courses.length > 0
+        ? profileData.courses.map(c => 
+            `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
+          ).join('\n')
+        : '  - No courses completed yet';
+
+      const nextSemesterContext = savedRecommendations?.recommendations 
+        ? `\n\nIMPORTANT: For the FIRST semester in your roadmap, you should use these recommended courses as the foundation:\n${savedRecommendations.recommendations}\n\nYou may adjust slightly if needed, but try to keep the first semester consistent with these recommendations.`
+        : '';
+
+      const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU).
+
+Create a complete semester-by-semester roadmap for this student to graduate on time:
+
+Student Profile:
+- Name: ${profileData.name || 'Not provided'}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
+- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
+- Additional Notes/Requirements: ${profileData.additionalNotes || 'None'}
+- Total Credits Earned: ${profileData.totalCredits || 0}
+- Completed Courses:
+${coursesList}
+
+IMPORTANT: Pay special attention to the "Additional Notes/Requirements" - these may include scholarship requirements, work schedules, or other constraints that MUST be considered when planning the roadmap. Standard full-time enrollment is 12-15 credits per semester.${nextSemesterContext}
+
+Generate a semester-by-semester plan from now until their expected graduation. For each semester, list:
+- Semester name (e.g., "Fall 2024", "Spring 2025")
+- 4-5 courses with course codes, names, and credit hours
+- Total credits for that semester
+- Brief explanation of why these courses were chosen
+
+Also provide a summary at the end with:
+- Total remaining credits needed
+- Total number of semesters
+- Any important notes or warnings
+
+Format your response EXACTLY like this structure:
+
+## Fall 2024 (15 Credits)
+
+**CSCI 1234 - Course Name** (3 Credits)
+Brief explanation of why this course.
+
+**MATH 2345 - Another Course** (4 Credits)
+Brief explanation.
+
+(Continue for all courses in this semester)
+
+## Spring 2025 (16 Credits)
+
+(Same format)
+
+---
+
+## Summary
+
+**Total Credits Needed:** XX
+**Semesters Remaining:** X
+**Notes:** Any important considerations
+
+Use this exact format with markdown headers (##) for each semester.`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      setSavedRoadmap(text);
+    } catch (err) {
+      console.error('Failed to generate roadmap:', err);
+    } finally {
+      setIsGeneratingRoadmap(false);
+    }
+  };
 
   const renderPage = () => {
     switch (currentPage) {
@@ -681,9 +916,23 @@ function App() {
       case 'courses':
         return <PlaceholderPage message="Course catalog will go here..." />;
       case 'recommendations':
-        return <Recommendations profileData={profileData} onNavigate={setCurrentPage} />;
+        return <Recommendations 
+          profileData={profileData} 
+          onNavigate={setCurrentPage} 
+          savedData={savedRecommendations}
+          onSaveData={setSavedRecommendations}
+          onGenerate={generateRecommendations}
+          isLoading={isGeneratingRecommendations}
+        />;
       case 'roadmap':
-        return <PlaceholderPage message="Semester roadmap will go here..." />;
+        return <SemesterRoadmap 
+          profileData={profileData} 
+          onNavigate={setCurrentPage}
+          savedRoadmap={savedRoadmap}
+          onGenerate={generateRoadmap}
+          isLoading={isGeneratingRoadmap}
+          hasRecommendations={!!savedRecommendations}
+        />;
       default:
         return <Dashboard onNavigate={setCurrentPage} profileData={profileData} />;
     }

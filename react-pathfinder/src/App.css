@@ -324,6 +324,142 @@
   }
 }
 
+/* Roadmap Styles */
+.roadmap-container {
+  max-width: 1000px;
+}
+
+.roadmap-intro {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.roadmap-results {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 32px;
+}
+
+.semester-grid {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.semester-card {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 20px;
+  border-left: 4px solid #4f2d7f;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.semester-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.semester-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.semester-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #4f2d7f;
+}
+
+.semester-credits {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fdb913;
+  background-color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.semester-courses {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.roadmap-course {
+  background-color: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 3px solid #fdb913;
+  transition: transform 0.2s;
+}
+
+.roadmap-course:hover {
+  transform: translateX(4px);
+}
+
+.roadmap-course-code {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.roadmap-course-name {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.roadmap-course-credits {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.roadmap-summary {
+  margin-top: 32px;
+  padding: 24px;
+  background-color: #f0e7ff;
+  border-radius: 8px;
+  border-left: 4px solid #4f2d7f;
+}
+
+.roadmap-summary-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4f2d7f;
+  margin-bottom: 12px;
+}
+
+.roadmap-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.roadmap-stat {
+  text-align: center;
+}
+
+.roadmap-stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4f2d7f;
+}
+
+.roadmap-stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
 /* Recommendations Page Styles */
 .recommendations-container {
   max-width: 900px;
