@@ -92,6 +92,24 @@ function Sidebar({ currentPage, onNavigate }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
+        <div style={{
+          width: '90px',
+          height: '90px',
+          borderRadius: '50%',
+          backgroundColor: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 12px',
+          padding: '5px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+        }}>
+          <img 
+            src="/logo.png" 
+            alt="PV Pathfinder Logo" 
+            style={{ width: '80px', height: '80px', borderRadius: '50%' }}
+          />
+        </div>
         <h1 className="sidebar-title">PV Pathfinder</h1>
         <p className="sidebar-subtitle">Academic Planning Assistant</p>
       </div>
@@ -124,6 +142,10 @@ function Dashboard({ onNavigate, profileData }) {
   const creditsEarned = profileData?.totalCredits || 0;
   const firstName = profileData?.name ? profileData.name.split(' ')[0] : null;
   
+  // Assuming 120 credits needed for graduation (typical bachelor's degree)
+  const totalCreditsNeeded = 120;
+  const progressPercentage = Math.min((creditsEarned / totalCreditsNeeded) * 100, 100);
+  
   return (
     <div>
       <div className="welcome-card">
@@ -140,6 +162,22 @@ function Dashboard({ onNavigate, profileData }) {
           {profileData ? 'Update Profile' : 'Set Up Profile'}
         </button>
       </div>
+
+      {profileData && (
+        <div className="progress-section">
+          <h4 className="progress-title">Degree Progress</h4>
+          <div className="progress-bar-container">
+            <div className="progress-bar" style={{ width: `${progressPercentage}%` }}>
+              {progressPercentage > 10 && (
+                <span className="progress-text">{Math.round(progressPercentage)}%</span>
+              )}
+            </div>
+          </div>
+          <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
+            {creditsEarned} of {totalCreditsNeeded} credits completed
+          </p>
+        </div>
+      )}
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -169,7 +207,7 @@ function PlaceholderPage({ message }) {
   );
 }
 
-function ProfileForm({ onSaveProfile, existingProfile }) {
+function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse, onTempUpdate }) {
   const [formData, setFormData] = useState({
     name: existingProfile?.name || '',
     major: existingProfile?.major || '',
@@ -193,6 +231,18 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
     grade: ''
   });
   const [saved, setSaved] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+
+  // Update temp data whenever form changes
+  React.useEffect(() => {
+    const tempProfile = {
+      ...formData,
+      courses: courses,
+      totalCredits: courses.reduce((sum, course) => sum + parseInt(course.credits || 0), 0)
+    };
+    onTempUpdate(tempProfile);
+  }, [formData, courses]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -252,10 +302,45 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
   };
 
   const removeCourse = (id) => {
+    const profileBeforeDelete = {
+      ...formData,
+      courses: courses,
+      totalCredits: courses.reduce((sum, course) => sum + parseInt(course.credits || 0), 0)
+    };
+    
     setCourses(prev => prev.filter(course => course.id !== id));
+    onDeleteCourse(id, profileBeforeDelete);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!formData.major) {
+      newErrors.major = 'Major is required';
+    }
+    
+    if (formData.hasDualMajor && !formData.major2) {
+      newErrors.major2 = 'Second major is required when dual major is selected';
+    }
+    
+    if (formData.hasDualMinor && formData.minor && !formData.minor2) {
+      newErrors.minor2 = 'Second minor is required when dual minor is selected';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = () => {
+    if (!validateForm()) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
     const profileToSave = {
       ...formData,
       courses: courses,
@@ -263,6 +348,7 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
     };
     onSaveProfile(profileToSave);
     setSaved(true);
+    showToast('Profile saved successfully!', 'success');
     setTimeout(() => setSaved(false), 3000);
   };
 
@@ -274,23 +360,53 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="modal-title">Remove Course?</h3>
+            <p className="modal-message">
+              Are you sure you want to remove this course? You can undo this action within 5 seconds.
+            </p>
+            <div className="modal-actions">
+              <button 
+                className="modal-button secondary"
+                onClick={() => setShowDeleteConfirm(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="modal-button primary"
+                onClick={() => {
+                  removeCourse(showDeleteConfirm);
+                  setShowDeleteConfirm(null);
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="form-section">
         <h3 className="section-title">Personal Information</h3>
         
         <div className="form-group">
-          <label className="form-label">Full Name</label>
+          <label className="form-label">Full Name *</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            className="form-input"
+            className={`form-input ${errors.name ? 'error' : ''}`}
             placeholder="Enter your full name"
           />
+          {errors.name && <div className="form-error">{errors.name}</div>}
         </div>
 
         <div className="form-group">
-          <label className="form-label">Major</label>
+          <label className="form-label">Major *</label>
           <Select
             name="major"
             value={majorOptions.find(option => option.value === formData.major) || null}
@@ -299,7 +415,9 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
             placeholder="Search or select your major..."
             isClearable
             isSearchable
+            className={errors.major ? 'error' : ''}
           />
+          {errors.major && <div className="form-error">{errors.major}</div>}
         </div>
 
         <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
@@ -318,7 +436,7 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
 
         {formData.hasDualMajor && (
           <div className="form-group">
-            <label className="form-label">Second Major</label>
+            <label className="form-label">Second Major *</label>
             <Select
               name="major2"
               value={majorOptions.find(option => option.value === formData.major2) || null}
@@ -327,7 +445,9 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
               placeholder="Search or select your second major..."
               isClearable
               isSearchable
+              className={errors.major2 ? 'error' : ''}
             />
+            {errors.major2 && <div className="form-error">{errors.major2}</div>}
           </div>
         )}
 
@@ -423,7 +543,7 @@ function ProfileForm({ onSaveProfile, existingProfile }) {
                     Edit
                   </button>
                   <button
-                    onClick={() => removeCourse(course.id)}
+                    onClick={() => setShowDeleteConfirm(course.id)}
                     className="remove-button"
                   >
                     Remove
@@ -652,7 +772,12 @@ Provide a helpful, conversational response to their question. Keep it concise an
 
       {isLoading && (
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="loading-spinner">
+            <div className="paw"></div>
+            <div className="paw"></div>
+            <div className="paw"></div>
+            <div className="paw"></div>
+          </div>
           <p className="loading-text">Analyzing your profile and generating recommendations...</p>
         </div>
       )}
@@ -770,7 +895,12 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
 
       {isLoading && (
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="loading-spinner">
+            <div className="paw"></div>
+            <div className="paw"></div>
+            <div className="paw"></div>
+            <div className="paw"></div>
+          </div>
           <p className="loading-text">Creating your personalized roadmap...</p>
         </div>
       )}
@@ -795,12 +925,73 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [profileData, setProfileData] = useState(null);
+  const [tempProfileData, setTempProfileData] = useState(null);
   const [savedRecommendations, setSavedRecommendations] = useState(null);
   const [savedRoadmap, setSavedRoadmap] = useState(null);
   const [isGeneratingRecommendations, setIsGeneratingRecommendations] = useState(false);
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
+  const [toasts, setToasts] = useState([]);
+  const [deletedCourse, setDeletedCourse] = useState(null);
+  const [undoTimeout, setUndoTimeout] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
+
+  // Toast notification system
+  const showToast = (message, type = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  // Handle course deletion with undo
+  const handleDeleteCourse = (courseId, profileWithCourse) => {
+    const course = profileWithCourse.courses.find(c => c.id === courseId);
+    setDeletedCourse({ course, profile: profileWithCourse });
+    
+    const timeout = setTimeout(() => {
+      setDeletedCourse(null);
+    }, 5000);
+    
+    setUndoTimeout(timeout);
+  };
+
+  const undoDelete = () => {
+    if (deletedCourse && undoTimeout) {
+      clearTimeout(undoTimeout);
+      setTempProfileData(deletedCourse.profile);
+      setDeletedCourse(null);
+      setUndoTimeout(null);
+      showToast('Course restored!', 'success');
+    }
+  };
+
+  // Handle page navigation with unsaved changes warning
+  const handleNavigation = (page) => {
+    if (hasUnsavedChanges && currentPage === 'profile') {
+      showToast('Don\'t forget to save your profile changes!', 'info');
+    }
+    setCurrentPage(page);
+  };
+
+  // Save profile and clear temp data
+  const handleSaveProfile = (profile) => {
+    setProfileData(profile);
+    setTempProfileData(null);
+    setHasUnsavedChanges(false);
+  };
+
+  // Update temp profile data
+  const handleTempProfileUpdate = (tempData) => {
+    setTempProfileData(tempData);
+    setHasUnsavedChanges(true);
+  };
 
   const generateRecommendations = async () => {
     if (!profileData) return;
@@ -845,8 +1036,10 @@ Format your response in a clear, organized way with proper headings and sections
       const text = response.text();
       
       setSavedRecommendations({ recommendations: text, chatMessages: [] });
+      showToast('Recommendations generated successfully!', 'success');
     } catch (err) {
       console.error('Failed to generate recommendations:', err);
+      showToast('Failed to generate recommendations. Please try again.', 'error');
     } finally {
       setIsGeneratingRecommendations(false);
     }
@@ -929,8 +1122,10 @@ Use this exact format with markdown headers (##) for each semester.`;
       const text = response.text();
       
       setSavedRoadmap(text);
+      showToast('Roadmap generated successfully!', 'success');
     } catch (err) {
       console.error('Failed to generate roadmap:', err);
+      showToast('Failed to generate roadmap. Please try again.', 'error');
     } finally {
       setIsGeneratingRoadmap(false);
     }
@@ -939,15 +1134,21 @@ Use this exact format with markdown headers (##) for each semester.`;
   const renderPage = () => {
     switch (currentPage) {
       case 'dashboard':
-        return <Dashboard onNavigate={setCurrentPage} profileData={profileData} />;
+        return <Dashboard onNavigate={handleNavigation} profileData={profileData} />;
       case 'profile':
-        return <ProfileForm onSaveProfile={setProfileData} existingProfile={profileData} />;
+        return <ProfileForm 
+          onSaveProfile={handleSaveProfile}
+          existingProfile={tempProfileData || profileData}
+          showToast={showToast}
+          onDeleteCourse={handleDeleteCourse}
+          onTempUpdate={handleTempProfileUpdate}
+        />;
       case 'courses':
         return <PlaceholderPage message="Course catalog will go here..." />;
       case 'recommendations':
         return <Recommendations 
           profileData={profileData} 
-          onNavigate={setCurrentPage} 
+          onNavigate={handleNavigation} 
           savedData={savedRecommendations}
           onSaveData={setSavedRecommendations}
           onGenerate={generateRecommendations}
@@ -956,25 +1157,51 @@ Use this exact format with markdown headers (##) for each semester.`;
       case 'roadmap':
         return <SemesterRoadmap 
           profileData={profileData} 
-          onNavigate={setCurrentPage}
+          onNavigate={handleNavigation}
           savedRoadmap={savedRoadmap}
           onGenerate={generateRoadmap}
           isLoading={isGeneratingRoadmap}
           hasRecommendations={!!savedRecommendations}
         />;
       default:
-        return <Dashboard onNavigate={setCurrentPage} profileData={profileData} />;
+        return <Dashboard onNavigate={handleNavigation} profileData={profileData} />;
     }
   };
 
   return (
     <div className="app-container">
-      <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+      <Sidebar currentPage={currentPage} onNavigate={handleNavigation} />
       
       <main className="main-content">
         <Header title={pageTitle} />
         <div className="content-area">{renderPage()}</div>
+        <footer className="app-footer">
+          © {new Date().getFullYear()} PV Pathfinder | Prairie View A&M University
+        </footer>
       </main>
+
+      {/* Toast Notifications */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast ${toast.type}`}>
+            <span className="toast-icon">
+              {toast.type === 'success' && '✓'}
+              {toast.type === 'error' && '✕'}
+              {toast.type === 'info' && 'ℹ'}
+            </span>
+            <span className="toast-message">{toast.message}</span>
+            <button className="toast-close" onClick={() => removeToast(toast.id)}>×</button>
+          </div>
+        ))}
+      </div>
+
+      {/* Undo Notification */}
+      {deletedCourse && (
+        <div className="undo-notification">
+          <span>Course removed</span>
+          <button className="undo-button" onClick={undoDelete}>Undo</button>
+        </div>
+      )}
     </div>
   );
 }
