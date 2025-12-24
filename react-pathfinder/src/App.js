@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import './App.css';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
@@ -207,7 +207,7 @@ function PlaceholderPage({ message }) {
   );
 }
 
-function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse, onTempUpdate }) {
+function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }) {
   const [formData, setFormData] = useState({
     name: existingProfile?.name || '',
     major: existingProfile?.major || '',
@@ -233,6 +233,27 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [initialData, setInitialData] = useState(null);
+
+  // Store initial data on mount to compare for changes
+  React.useEffect(() => {
+    if (!initialData && existingProfile) {
+      setInitialData({
+        formData: {
+          name: existingProfile.name || '',
+          major: existingProfile.major || '',
+          major2: existingProfile.major2 || '',
+          minor: existingProfile.minor || '',
+          minor2: existingProfile.minor2 || '',
+          hasDualMajor: existingProfile.hasDualMajor || false,
+          hasDualMinor: existingProfile.hasDualMinor || false,
+          expectedGraduation: existingProfile.expectedGraduation || '',
+          additionalNotes: existingProfile.additionalNotes || ''
+        },
+        courses: [...(existingProfile.courses || [])]
+      });
+    }
+  }, [existingProfile, initialData]);
 
   // Update temp data whenever form changes
   React.useEffect(() => {
@@ -241,8 +262,17 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse
       courses: courses,
       totalCredits: courses.reduce((sum, course) => sum + parseInt(course.credits || 0), 0)
     };
-    onTempUpdate(tempProfile);
-  }, [formData, courses]);
+    
+    // Check if there are actual changes
+    let hasChanges = false;
+    if (initialData) {
+      const formChanged = JSON.stringify(formData) !== JSON.stringify(initialData.formData);
+      const coursesChanged = JSON.stringify(courses) !== JSON.stringify(initialData.courses);
+      hasChanges = formChanged || coursesChanged;
+    }
+    
+    onTempUpdate(tempProfile, hasChanges);
+  }, [formData, courses, onTempUpdate, initialData]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -302,14 +332,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse
   };
 
   const removeCourse = (id) => {
-    const profileBeforeDelete = {
-      ...formData,
-      courses: courses,
-      totalCredits: courses.reduce((sum, course) => sum + parseInt(course.credits || 0), 0)
-    };
-    
     setCourses(prev => prev.filter(course => course.id !== id));
-    onDeleteCourse(id, profileBeforeDelete);
   };
 
   const validateForm = () => {
@@ -347,6 +370,13 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse
       totalCredits: courses.reduce((sum, course) => sum + parseInt(course.credits || 0), 0)
     };
     onSaveProfile(profileToSave);
+    
+    // Update initial data after save
+    setInitialData({
+      formData: { ...formData },
+      courses: [...courses]
+    });
+    
     setSaved(true);
     showToast('Profile saved successfully!', 'success');
     setTimeout(() => setSaved(false), 3000);
@@ -366,7 +396,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onDeleteCourse
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="modal-title">Remove Course?</h3>
             <p className="modal-message">
-              Are you sure you want to remove this course? You can undo this action within 5 seconds.
+              Are you sure you want to remove this course?
             </p>
             <div className="modal-actions">
               <button 
@@ -931,8 +961,6 @@ function App() {
   const [isGeneratingRecommendations, setIsGeneratingRecommendations] = useState(false);
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
   const [toasts, setToasts] = useState([]);
-  const [deletedCourse, setDeletedCourse] = useState(null);
-  const [undoTimeout, setUndoTimeout] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
@@ -948,28 +976,6 @@ function App() {
 
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
-  };
-
-  // Handle course deletion with undo
-  const handleDeleteCourse = (courseId, profileWithCourse) => {
-    const course = profileWithCourse.courses.find(c => c.id === courseId);
-    setDeletedCourse({ course, profile: profileWithCourse });
-    
-    const timeout = setTimeout(() => {
-      setDeletedCourse(null);
-    }, 5000);
-    
-    setUndoTimeout(timeout);
-  };
-
-  const undoDelete = () => {
-    if (deletedCourse && undoTimeout) {
-      clearTimeout(undoTimeout);
-      setTempProfileData(deletedCourse.profile);
-      setDeletedCourse(null);
-      setUndoTimeout(null);
-      showToast('Course restored!', 'success');
-    }
   };
 
   // Handle page navigation with unsaved changes warning
@@ -988,10 +994,10 @@ function App() {
   };
 
   // Update temp profile data
-  const handleTempProfileUpdate = (tempData) => {
+  const handleTempProfileUpdate = useCallback((tempData, hasChanges) => {
     setTempProfileData(tempData);
-    setHasUnsavedChanges(true);
-  };
+    setHasUnsavedChanges(hasChanges);
+  }, []);
 
   const generateRecommendations = async () => {
     if (!profileData) return;
@@ -1140,7 +1146,6 @@ Use this exact format with markdown headers (##) for each semester.`;
           onSaveProfile={handleSaveProfile}
           existingProfile={tempProfileData || profileData}
           showToast={showToast}
-          onDeleteCourse={handleDeleteCourse}
           onTempUpdate={handleTempProfileUpdate}
         />;
       case 'courses':
@@ -1195,13 +1200,7 @@ Use this exact format with markdown headers (##) for each semester.`;
         ))}
       </div>
 
-      {/* Undo Notification */}
-      {deletedCourse && (
-        <div className="undo-notification">
-          <span>Course removed</span>
-          <button className="undo-button" onClick={undoDelete}>Undo</button>
-        </div>
-      )}
+      {/* Undo Notification - Removed */}
     </div>
   );
 }
