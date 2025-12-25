@@ -142,6 +142,32 @@ function Dashboard({ onNavigate, profileData }) {
   const creditsEarned = profileData?.totalCredits || 0;
   const firstName = profileData?.name ? profileData.name.split(' ')[0] : null;
   
+  // Calculate GPA
+  const calculateGPA = () => {
+    if (!profileData?.courses || profileData.courses.length === 0) return 0;
+    
+    const gradePoints = {
+      'A': 4.0, 'B': 3.0, 'C': 2.0, 'D': 1.0, 'F': 0.0
+    };
+    
+    let totalPoints = 0;
+    let totalCredits = 0;
+    
+    profileData.courses.forEach(course => {
+      const grade = course.grade?.toUpperCase();
+      const credits = parseInt(course.credits) || 0;
+      
+      if (gradePoints[grade] !== undefined) {
+        totalPoints += gradePoints[grade] * credits;
+        totalCredits += credits;
+      }
+    });
+    
+    return totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : 0;
+  };
+  
+  const gpa = calculateGPA();
+  
   // Assuming 120 credits needed for graduation (typical bachelor's degree)
   const totalCreditsNeeded = 120;
   const progressPercentage = Math.min((creditsEarned / totalCreditsNeeded) * 100, 100);
@@ -158,24 +184,32 @@ function Dashboard({ onNavigate, profileData }) {
             : 'Your AI-powered academic planning assistant. Get started by setting up your profile.'
           }
         </p>
-        <button onClick={() => onNavigate('profile')} className="primary-button">
+        <button onClick={() => onNavigate('profile')} className="primary-button" aria-label={profileData ? 'Update your profile' : 'Set up your profile'}>
           {profileData ? 'Update Profile' : 'Set Up Profile'}
         </button>
       </div>
 
-      {profileData && (
-        <div className="progress-section">
-          <h4 className="progress-title">Degree Progress</h4>
-          <div className="progress-bar-container">
-            <div className="progress-bar" style={{ width: `${progressPercentage}%` }}>
-              {progressPercentage > 10 && (
-                <span className="progress-text">{Math.round(progressPercentage)}%</span>
-              )}
+      {profileData && gpa > 0 && (
+        <div className="progress-gpa-row">
+          <div className="progress-section">
+            <h4 className="progress-title">Degree Progress</h4>
+            <div className="progress-bar-container" role="progressbar" aria-valuenow={progressPercentage} aria-valuemin="0" aria-valuemax="100" aria-label="Degree completion progress">
+              <div className="progress-bar" style={{ width: `${progressPercentage}%` }}>
+                {progressPercentage > 10 && (
+                  <span className="progress-text">{Math.round(progressPercentage)}%</span>
+                )}
+              </div>
             </div>
+            <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
+              {creditsEarned} of {totalCreditsNeeded} credits completed
+            </p>
           </div>
-          <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
-            {creditsEarned} of {totalCreditsNeeded} credits completed
-          </p>
+
+          <div className="gpa-section">
+            <h4 className="gpa-title">Current GPA</h4>
+            <div className="gpa-value">{gpa}</div>
+            <p className="gpa-scale">out of 4.0</p>
+          </div>
         </div>
       )}
 
@@ -774,6 +808,20 @@ Provide a helpful, conversational response to their question. Keep it concise an
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportText = () => {
+    const element = document.createElement('a');
+    const file = new Blob([recommendations], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = 'course-recommendations.txt';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   return (
     <div className="recommendations-container">
       {!profileData ? (
@@ -816,12 +864,21 @@ Provide a helpful, conversational response to their question. Keep it concise an
         <div className="recommendations-results">
           <div className="results-header">
             <h3 className="results-title">Your Course Recommendations</h3>
-            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading}>
+            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading} aria-label="Regenerate course recommendations">
               Regenerate
             </button>
           </div>
           <div className="recommendations-content">
             <ReactMarkdown>{recommendations}</ReactMarkdown>
+          </div>
+
+          <div className="export-buttons">
+            <button onClick={handlePrint} className="export-button" aria-label="Print recommendations">
+              🖨️ Print
+            </button>
+            <button onClick={handleExportText} className="export-button" aria-label="Download recommendations as text file">
+              📄 Download as Text
+            </button>
           </div>
 
           <div className="chat-container">
@@ -886,6 +943,20 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
     }
   }, [savedRoadmap]);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportText = () => {
+    const element = document.createElement('a');
+    const file = new Blob([roadmap], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = 'semester-roadmap.txt';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   return (
     <div className="roadmap-container">
       {!profileData ? (
@@ -939,12 +1010,21 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
         <div className="roadmap-results">
           <div className="results-header">
             <h3 className="results-title">Your Semester Roadmap</h3>
-            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading}>
+            <button onClick={onGenerate} className="regenerate-button" disabled={isLoading} aria-label="Regenerate semester roadmap">
               Regenerate
             </button>
           </div>
           <div className="recommendations-content">
             <ReactMarkdown>{roadmap}</ReactMarkdown>
+          </div>
+          
+          <div className="export-buttons">
+            <button onClick={handlePrint} className="export-button" aria-label="Print roadmap">
+              🖨️ Print
+            </button>
+            <button onClick={handleExportText} className="export-button" aria-label="Download roadmap as text file">
+              📄 Download as Text
+            </button>
           </div>
         </div>
       )}
@@ -1199,8 +1279,6 @@ Use this exact format with markdown headers (##) for each semester.`;
           </div>
         ))}
       </div>
-
-      {/* Undo Notification - Removed */}
     </div>
   );
 }
