@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import './App.css';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import ReactMarkdown from 'react-markdown';
 import Select from 'react-select';
-
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY_HERE';
+import * as aiService from './services/aiService';
 
 const majorOptions = [
   { value: 'Computer Science', label: 'Computer Science' },
@@ -75,54 +73,6 @@ const graduationOptions = [
   { value: 'Spring 2029', label: 'Spring 2029' },
   { value: 'Summer 2029', label: 'Summer 2029' },
   { value: 'Fall 2029', label: 'Fall 2029' }
-];
-
-const courseCatalog = [
-  // Computer Science
-  { id: 1, code: 'CS 1013', name: 'Introduction to Computer Science', credits: 3, department: 'Computer Science', description: 'Introduction to computer science concepts, problem-solving, and programming fundamentals.', prerequisites: 'None', semesters: ['Fall', 'Spring'] },
-  { id: 2, code: 'CS 2013', name: 'Data Structures', credits: 3, department: 'Computer Science', description: 'Study of abstract data types, including lists, stacks, queues, trees, and graphs.', prerequisites: 'CS 1013', semesters: ['Fall', 'Spring'] },
-  { id: 3, code: 'CS 3013', name: 'Algorithms', credits: 3, department: 'Computer Science', description: 'Design and analysis of algorithms, complexity theory, and computational problem-solving.', prerequisites: 'CS 2013', semesters: ['Fall', 'Spring'] },
-  { id: 4, code: 'CS 3113', name: 'Database Systems', credits: 3, department: 'Computer Science', description: 'Database design, SQL, normalization, and database management systems.', prerequisites: 'CS 2013', semesters: ['Spring'] },
-  { id: 5, code: 'CS 4013', name: 'Software Engineering', credits: 3, department: 'Computer Science', description: 'Software development lifecycle, design patterns, testing, and project management.', prerequisites: 'CS 3013', semesters: ['Fall'] },
-  
-  // Mathematics
-  { id: 6, code: 'MATH 1314', name: 'College Algebra', credits: 3, department: 'Mathematics', description: 'Study of algebraic concepts including functions, polynomials, and equations.', prerequisites: 'None', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 7, code: 'MATH 1324', name: 'Trigonometry', credits: 3, department: 'Mathematics', description: 'Trigonometric functions, identities, and applications.', prerequisites: 'MATH 1314', semesters: ['Fall', 'Spring'] },
-  { id: 8, code: 'MATH 2413', name: 'Calculus I', credits: 4, department: 'Mathematics', description: 'Limits, derivatives, and applications of differentiation.', prerequisites: 'MATH 1324', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 9, code: 'MATH 2414', name: 'Calculus II', credits: 4, department: 'Mathematics', description: 'Integration techniques, applications of integration, and series.', prerequisites: 'MATH 2413', semesters: ['Fall', 'Spring'] },
-  { id: 10, code: 'MATH 3320', name: 'Linear Algebra', credits: 3, department: 'Mathematics', description: 'Vector spaces, matrices, linear transformations, and eigenvalues.', prerequisites: 'MATH 2413', semesters: ['Fall', 'Spring'] },
-  
-  // Engineering
-  { id: 11, code: 'ENGR 1201', name: 'Introduction to Engineering', credits: 2, department: 'Engineering', description: 'Overview of engineering disciplines, problem-solving, and design process.', prerequisites: 'None', semesters: ['Fall', 'Spring'] },
-  { id: 12, code: 'ENGR 2304', name: 'Engineering Mechanics - Statics', credits: 3, department: 'Engineering', description: 'Forces, moments, equilibrium, and analysis of structures.', prerequisites: 'MATH 2413', semesters: ['Fall', 'Spring'] },
-  { id: 13, code: 'ENGR 2305', name: 'Engineering Mechanics - Dynamics', credits: 3, department: 'Engineering', description: 'Kinematics and kinetics of particles and rigid bodies.', prerequisites: 'ENGR 2304', semesters: ['Spring'] },
-  { id: 14, code: 'ENGR 3301', name: 'Thermodynamics', credits: 3, department: 'Engineering', description: 'Laws of thermodynamics, heat transfer, and energy systems.', prerequisites: 'MATH 2414', semesters: ['Fall'] },
-  
-  // Business
-  { id: 15, code: 'ACCT 2301', name: 'Principles of Accounting I', credits: 3, department: 'Business', description: 'Financial accounting concepts, preparation of financial statements.', prerequisites: 'None', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 16, code: 'ACCT 2302', name: 'Principles of Accounting II', credits: 3, department: 'Business', description: 'Managerial accounting, cost analysis, and budgeting.', prerequisites: 'ACCT 2301', semesters: ['Fall', 'Spring'] },
-  { id: 17, code: 'BUAD 3301', name: 'Business Statistics', credits: 3, department: 'Business', description: 'Statistical methods for business decision-making and data analysis.', prerequisites: 'MATH 1314', semesters: ['Fall', 'Spring'] },
-  { id: 18, code: 'MGMT 3301', name: 'Principles of Management', credits: 3, department: 'Business', description: 'Management theory, organizational behavior, and leadership.', prerequisites: 'Junior standing', semesters: ['Fall', 'Spring'] },
-  { id: 19, code: 'MKTG 3301', name: 'Principles of Marketing', credits: 3, department: 'Business', description: 'Marketing concepts, consumer behavior, and marketing strategies.', prerequisites: 'Junior standing', semesters: ['Fall', 'Spring'] },
-  
-  // Biology
-  { id: 20, code: 'BIOL 1406', name: 'General Biology I', credits: 4, department: 'Biology', description: 'Cell structure, genetics, evolution, and molecular biology.', prerequisites: 'None', semesters: ['Fall', 'Spring'] },
-  { id: 21, code: 'BIOL 1407', name: 'General Biology II', credits: 4, department: 'Biology', description: 'Diversity of life, ecology, and organismal biology.', prerequisites: 'BIOL 1406', semesters: ['Fall', 'Spring'] },
-  { id: 22, code: 'BIOL 3401', name: 'Genetics', credits: 4, department: 'Biology', description: 'Mendelian and molecular genetics, gene expression and regulation.', prerequisites: 'BIOL 1407', semesters: ['Fall'] },
-  
-  // Chemistry
-  { id: 23, code: 'CHEM 1411', name: 'General Chemistry I', credits: 4, department: 'Chemistry', description: 'Atomic structure, chemical bonding, and stoichiometry.', prerequisites: 'MATH 1314', semesters: ['Fall', 'Spring'] },
-  { id: 24, code: 'CHEM 1412', name: 'General Chemistry II', credits: 4, department: 'Chemistry', description: 'Thermodynamics, kinetics, equilibrium, and electrochemistry.', prerequisites: 'CHEM 1411', semesters: ['Fall', 'Spring'] },
-  { id: 25, code: 'CHEM 3411', name: 'Organic Chemistry I', credits: 4, department: 'Chemistry', description: 'Structure, properties, and reactions of organic compounds.', prerequisites: 'CHEM 1412', semesters: ['Fall'] },
-  
-  // English
-  { id: 26, code: 'ENGL 1301', name: 'Composition I', credits: 3, department: 'English', description: 'Academic writing, critical thinking, and research skills.', prerequisites: 'None', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 27, code: 'ENGL 1302', name: 'Composition II', credits: 3, department: 'English', description: 'Advanced composition, argumentation, and literary analysis.', prerequisites: 'ENGL 1301', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 28, code: 'ENGL 2311', name: 'Technical Writing', credits: 3, department: 'English', description: 'Professional and technical communication for various audiences.', prerequisites: 'ENGL 1302', semesters: ['Fall', 'Spring'] },
-  
-  // History
-  { id: 29, code: 'HIST 1301', name: 'United States History I', credits: 3, department: 'History', description: 'American history from colonial period to Reconstruction.', prerequisites: 'None', semesters: ['Fall', 'Spring', 'Summer'] },
-  { id: 30, code: 'HIST 1302', name: 'United States History II', credits: 3, department: 'History', description: 'American history from Reconstruction to present.', prerequisites: 'None', semesters: ['Fall', 'Spring', 'Summer'] },
 ];
 
 const navItems = [
@@ -272,51 +222,62 @@ function Dashboard({ onNavigate, profileData }) {
   );
 }
 
-function CourseCatalog({ profileData }) {
+function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
-  const [selectedSemester, setSelectedSemester] = useState('All');
+  const [selectedLevel, setSelectedLevel] = useState('All');
 
-  const departments = ['All', ...new Set(courseCatalog.map(course => course.department))];
-  const semesters = ['All', 'Fall', 'Spring', 'Summer'];
+  const departments = ['All', ...new Set(courseCatalog.map(course => course.department))].sort();
+  const degreeLevels = ['All', "Bachelor's", "Master's", "Doctoral", "Executive Master's"];
 
   const filteredCourses = courseCatalog.filter(course => {
     const matchesSearch = course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDepartment = selectedDepartment === 'All' || course.department === selectedDepartment;
-    const matchesSemester = selectedSemester === 'All' || course.semesters.includes(selectedSemester);
+    const matchesLevel = selectedLevel === 'All' || course.degreeLevel === selectedLevel;
     
-    return matchesSearch && matchesDepartment && matchesSemester;
+    return matchesSearch && matchesDepartment && matchesLevel;
   });
 
   const checkPrerequisites = (course) => {
-    if (!profileData?.courses || course.prerequisites === 'None') return true;
+    if (!profileData?.courses || !course.prerequisites || course.prerequisites === 'None') return true;
     
-    const completedCodes = profileData.courses.map(c => c.code.toUpperCase());
-    const prereqCodes = course.prerequisites.split(',').map(p => p.trim().toUpperCase());
+    const completedCodes = profileData.courses.map(c => c.code.toUpperCase().trim());
+    const prereqText = course.prerequisites.toUpperCase();
     
-    return prereqCodes.every(prereq => 
-      prereq === 'NONE' || 
-      prereq.includes('STANDING') || 
-      completedCodes.some(code => code === prereq)
-    );
+    return completedCodes.some(code => prereqText.includes(code)) || prereqText === 'NONE';
   };
+
+  if (isLoadingCourses) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner">
+          <div className="paw"></div>
+          <div className="paw"></div>
+          <div className="paw"></div>
+          <div className="paw"></div>
+        </div>
+        <p className="loading-text">Loading PVAMU course catalog...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="catalog-container">
       <div className="catalog-header">
-        <h3 className="catalog-title">Course Catalog</h3>
+        <h3 className="catalog-title">PVAMU Course Catalog</h3>
         <p className="catalog-description">
-          Browse and search through available courses. Use filters to find courses by department or semester.
+          Browse Prairie View A&M University's complete course catalog with {courseCatalog.length.toLocaleString()}+ courses. Search by course code or name, and filter by department or degree level.
         </p>
       </div>
 
       <div className="catalog-filters">
-        <div className="search-box">
+        <div className="filter-group">
+          <label className="filter-label">Search Courses:</label>
           <input
             type="text"
             className="catalog-search"
-            placeholder="Search by course code or name..."
+            placeholder="Search by course code or name (e.g., COMP 1336, Calculus)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -336,14 +297,14 @@ function CourseCatalog({ profileData }) {
         </div>
 
         <div className="filter-group">
-          <label className="filter-label">Semester:</label>
+          <label className="filter-label">Degree Level:</label>
           <select 
             className="catalog-select"
-            value={selectedSemester}
-            onChange={(e) => setSelectedSemester(e.target.value)}
+            value={selectedLevel}
+            onChange={(e) => setSelectedLevel(e.target.value)}
           >
-            {semesters.map(sem => (
-              <option key={sem} value={sem}>{sem}</option>
+            {degreeLevels.map(level => (
+              <option key={level} value={level}>{level}</option>
             ))}
           </select>
         </div>
@@ -365,7 +326,7 @@ function CourseCatalog({ profileData }) {
                     <h4 className="course-card-code">{course.code}</h4>
                     <p className="course-card-name">{course.name}</p>
                   </div>
-                  <div className="course-card-credits">{course.credits} Credits</div>
+                  <div className="course-card-credits">{course.credits} {course.credits === 1 ? 'Credit' : 'Credits'}</div>
                 </div>
 
                 <p className="course-card-description">{course.description}</p>
@@ -376,16 +337,21 @@ function CourseCatalog({ profileData }) {
                       <strong>Department:</strong> {course.department}
                     </span>
                     <span className="course-meta-item">
-                      <strong>Offered:</strong> {course.semesters.join(', ')}
+                      <strong>Level:</strong> {course.degreeLevel}
                     </span>
                     <span className="course-meta-item">
-                      <strong>Prerequisites:</strong> {course.prerequisites}
+                      <strong>Prerequisites:</strong> {course.prerequisites || 'None'}
                     </span>
+                    {course.coRequisites && course.coRequisites !== 'None' && (
+                      <span className="course-meta-item">
+                        <strong>Co-requisites:</strong> {course.coRequisites}
+                      </span>
+                    )}
                   </div>
 
-                  {profileData && !hasPrereqs && course.prerequisites !== 'None' && (
+                  {profileData && !hasPrereqs && course.prerequisites && course.prerequisites !== 'None' && (
                     <div className="prereq-warning">
-                      ⚠️ Prerequisites not met
+                      ⚠️ Prerequisites may not be met
                     </div>
                   )}
                 </div>
@@ -405,7 +371,7 @@ function CourseCatalog({ profileData }) {
   );
 }
 
-function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }) {
+function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, courseCatalog }) {
   const [formData, setFormData] = useState({
     name: existingProfile?.name || '',
     major: existingProfile?.major || '',
@@ -422,6 +388,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({ code: '', name: '', credits: '', semester: '', grade: '' });
+  const [selectedCourseOption, setSelectedCourseOption] = useState(null);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
@@ -477,6 +444,40 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }
     setNewCourse(prev => ({ ...prev, [name]: value }));
   };
 
+  // Format courses for React-Select autocomplete
+  const courseOptions = courseCatalog
+    .filter(course => course.degreeLevel === "Bachelor's") // Only show bachelor's courses
+    .map(course => ({
+      value: course.id,
+      label: `${course.code} - ${course.name} (${course.credits} credits)`,
+      courseData: {
+        code: course.code,
+        name: course.name,
+        credits: course.credits
+      }
+    }));
+
+  // Handle course selection from autocomplete
+  const handleCourseSelect = (selectedOption) => {
+    if (selectedOption) {
+      setSelectedCourseOption(selectedOption);
+      setNewCourse(prev => ({
+        ...prev,
+        code: selectedOption.courseData.code,
+        name: selectedOption.courseData.name,
+        credits: selectedOption.courseData.credits.toString()
+      }));
+    } else {
+      setSelectedCourseOption(null);
+      setNewCourse(prev => ({
+        ...prev,
+        code: '',
+        name: '',
+        credits: ''
+      }));
+    }
+  };
+
   const addCourse = () => {
     if (newCourse.code && newCourse.name && newCourse.credits) {
       if (editingCourse !== null) {
@@ -488,6 +489,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }
         setCourses(prev => [...prev, { ...newCourse, id: Date.now() }]);
       }
       setNewCourse({ code: '', name: '', credits: '', semester: '', grade: '' });
+      setSelectedCourseOption(null);
       setShowAddCourse(false);
     }
   };
@@ -495,12 +497,14 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }
   const editCourse = (index) => {
     const course = courses[index];
     setNewCourse({ code: course.code, name: course.name, credits: course.credits, semester: course.semester, grade: course.grade });
+    setSelectedCourseOption(null); // Clear autocomplete when editing
     setEditingCourse(index);
     setShowAddCourse(true);
   };
 
   const cancelEdit = () => {
     setNewCourse({ code: '', name: '', credits: '', semester: '', grade: '' });
+    setSelectedCourseOption(null);
     setEditingCourse(null);
     setShowAddCourse(false);
   };
@@ -682,26 +686,69 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate }
         ) : (
           <div className="add-course-section">
             <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>{editingCourse !== null ? 'Edit Course' : 'Add New Course'}</h4>
-            <div className="form-row">
+            
+            {editingCourse === null && (
               <div className="form-group">
-                <label className="form-label">Course Code</label>
-                <input type="text" name="code" value={newCourse.code} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., CS 101" />
+                <label className="form-label">Search for Course</label>
+                <Select
+                  value={selectedCourseOption}
+                  onChange={handleCourseSelect}
+                  options={courseOptions}
+                  placeholder="Type to search (e.g., COMP 1336, Calculus, Biology)..."
+                  isClearable
+                  isSearchable
+                  noOptionsMessage={() => "No courses found"}
+                />
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  Search by course code or name. Course details will auto-fill.
+                </p>
               </div>
-              <div className="form-group">
-                <label className="form-label">Course Name</label>
-                <input type="text" name="name" value={newCourse.name} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Intro to Programming" />
+            )}
+
+            {editingCourse !== null && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Course Code</label>
+                  <input type="text" name="code" value={newCourse.code} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., COMP 1336" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Course Name</label>
+                  <input type="text" name="name" value={newCourse.name} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Computer Science I" />
+                </div>
               </div>
+            )}
+
+            {selectedCourseOption && editingCourse === null && (
+              <div style={{ 
+                backgroundColor: '#f0fdf4', 
+                border: '1px solid #86efac', 
+                borderRadius: '6px', 
+                padding: '12px', 
+                marginBottom: '16px' 
+              }}>
+                <p style={{ fontSize: '14px', color: '#166534', fontWeight: '600', marginBottom: '4px' }}>
+                  ✓ Course Selected:
+                </p>
+                <p style={{ fontSize: '14px', color: '#166534' }}>
+                  <strong>{newCourse.code}</strong> - {newCourse.name} ({newCourse.credits} credits)
+                </p>
+              </div>
+            )}
+
+            {editingCourse !== null && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Credits</label>
+                  <input type="number" name="credits" value={newCourse.credits} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., 3" />
+                </div>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label">Semester Taken</label>
+              <input type="text" name="semester" value={newCourse.semester} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Fall 2023" />
             </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Credits</label>
-                <input type="number" name="credits" value={newCourse.credits} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., 3" />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Semester Taken</label>
-                <input type="text" name="semester" value={newCourse.semester} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Fall 2023" />
-              </div>
-            </div>
+            
             <div className="form-group">
               <label className="form-label">Grade</label>
               <select name="grade" value={newCourse.grade} onChange={handleCourseInputChange} className="form-select">
@@ -746,44 +793,19 @@ function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGen
 
     const userMessage = chatInput.trim();
     setChatInput('');
-    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    const newUserMessage = { role: 'user', text: userMessage };
+    setChatMessages(prev => [...prev, newUserMessage]);
     setChatLoading(true);
 
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const text = await aiService.chatWithAdvisor(
+        profileData,
+        chatMessages,
+        userMessage,
+        recommendations
+      );
 
-      const coursesList = profileData.courses && profileData.courses.length > 0
-        ? profileData.courses.map(c => `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`).join('\n')
-        : '  - No courses completed yet';
-
-      const chatHistory = chatMessages.map(msg => `${msg.role === 'user' ? 'Student' : 'Advisor'}: ${msg.text}`).join('\n');
-
-      const chatPrompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
-
-Student Profile:
-- Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
-- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
-- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
-- Completed Courses:
-${coursesList}
-
-Your previous recommendations:
-${recommendations}
-
-Chat History:
-${chatHistory}
-
-Student's new question: ${userMessage}
-
-Provide a helpful, conversational response to their question. Keep it concise and relevant to their academic planning. Be friendly and supportive.`;
-
-      const result = await model.generateContent(chatPrompt);
-      const response = await result.response;
-      const text = response.text();
-
-      const updatedMessages = [...chatMessages, { role: 'ai', text }];
+      const updatedMessages = [...chatMessages, newUserMessage, { role: 'ai', text }];
       setChatMessages(updatedMessages);
       onSaveData({ recommendations, chatMessages: updatedMessages });
     } catch (err) {
@@ -988,8 +1010,76 @@ function App() {
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [courseCatalog, setCourseCatalog] = useState([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
+
+  useEffect(() => {
+    fetch('/pvamu_courses.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load courses');
+        return res.json();
+      })
+      .then(data => {
+        const transformedData = data.map(course => {
+          const departmentCode = course.course_code.split(' ')[0];
+          const departmentNames = {
+            'ACCT': 'Accounting', 'AFAM': 'African American Studies', 'AGRI': 'Agriculture',
+            'AGRO': 'Agronomy', 'ANSC': 'Animal Science', 'ARAB': 'Arabic', 'ARCH': 'Architecture',
+            'ARMY': 'Army ROTC', 'ARTS': 'Arts', 'BIOL': 'Biology', 'BLAW': 'Business Law',
+            'BCOM': 'Business Communication', 'CHEG': 'Chemical Engineering', 'CHEM': 'Chemistry',
+            'CHIN': 'Chinese', 'CINS': 'Computer Information Systems', 'CODE': 'Community Development',
+            'COMM': 'Communication', 'COMP': 'Computer Science', 'CONS': 'Construction Science',
+            'CNSL': 'Counseling', 'CPSY': 'Clinical Psychology', 'CPET': 'Computer Engineering Technology',
+            'CRIJ': 'Criminal Justice', 'CURR': 'Curriculum', 'CUIN': 'Curriculum and Instruction',
+            'CVEG': 'Civil Engineering', 'DANC': 'Dance', 'DGMA': 'Digital Media Arts', 'DRAM': 'Drama',
+            'ECON': 'Economics', 'EDBA': 'Executive Doctor of Business Administration',
+            'ADMN': 'Educational Administration', 'EDUL': 'Educational Leadership',
+            'EDFN': 'Educational Foundations', 'EDTC': 'Educational Technology',
+            'ELEG': 'Electrical Engineering', 'ELET': 'Electrical Engineering Technology',
+            'EMGM': 'Executive Management', 'EMIS': 'Executive MIS', 'EMCO': 'Executive Communication',
+            'EMRK': 'Executive Marketing', 'ENGL': 'English', 'ENTR': 'Entrepreneurship',
+            'ESPT': 'eSports', 'FDSC': 'Food Science', 'FINA': 'Finance', 'EFIN': 'Executive Finance',
+            'FLLT': 'Foreign Languages', 'FREN': 'French', 'GNEG': 'General Engineering',
+            'GNST': 'General Studies', 'GEOG': 'Geography', 'HKIN': 'Health and Kinesiology',
+            'HLTH': 'Health', 'HIST': 'History', 'HCOL': 'Honors College',
+            'HDFM': 'Human Development and Family Studies', 'HUMA': 'Humanities',
+            'HUNF': 'Human Nutrition and Foods', 'HUSC': 'Human Sciences',
+            'JPSY': 'Juvenile Psychology', 'JJUS': 'Juvenile Justice', 'KINE': 'Kinesiology',
+            'MATH': 'Mathematics', 'MCEG': 'Mechanical Engineering', 'MGMT': 'Management',
+            'MRKT': 'Marketing', 'MISY': 'Management Information Systems', 'MUSC': 'Music',
+            'NAVY': 'Navy ROTC', 'NRES': 'Natural Resources', 'NURS': 'Nursing', 'NUTR': 'Nutrition',
+            'PHIL': 'Philosophy', 'PHED': 'Physical Education', 'PHSC': 'Physical Science',
+            'PHYS': 'Physics', 'PHLT': 'Public Health', 'POSC': 'Political Science',
+            'PSYC': 'Psychology', 'PVEX': 'Prairie View Experience', 'RDNG': 'Reading',
+            'REST': 'Real Estate', 'SOCG': 'Sociology', 'SOWK': 'Social Work', 'SPAN': 'Spanish',
+            'SPED': 'Special Education', 'SPMT': 'Sport Management', 'SCMG': 'Supply Chain Management',
+            'SUPV': 'Supervision', 'AFSC': 'Air Force ROTC'
+          };
+          
+          return {
+            id: course.id,
+            code: course.course_code,
+            name: course.title,
+            credits: parseInt(course.credit_hours) || 0,
+            department: departmentNames[departmentCode] || departmentCode,
+            description: course.title,
+            prerequisites: course.prerequisites === 'NULL' ? 'None' : course.prerequisites,
+            degreeLevel: course.degree_level,
+            coRequisites: course.co_requisites === 'NULL' ? 'None' : course.co_requisites
+          };
+        });
+        
+        setCourseCatalog(transformedData);
+        setIsLoadingCourses(false);
+      })
+      .catch(err => {
+        console.error('Error loading courses:', err);
+        showToast('Failed to load course catalog. Please refresh the page.', 'error');
+        setIsLoadingCourses(false);
+      });
+  }, []);
 
   const showToast = (message, type = 'info') => {
     const id = Date.now();
@@ -1025,40 +1115,7 @@ function App() {
     setIsGeneratingRecommendations(true);
 
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-      const coursesList = profileData.courses && profileData.courses.length > 0
-        ? profileData.courses.map(c => `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`).join('\n')
-        : '  - No courses completed yet';
-
-      const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
-      
-A student needs course recommendations for the next semester. Here is their information:
-
-- Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
-- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
-- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
-- Additional Notes/Constraints: ${profileData.additionalNotes || 'None'}
-- Completed Courses: 
-${coursesList}
-- Total Credits Earned: ${profileData.totalCredits || 0}
-
-Based on this information, please:
-1. Recommend 4-5 courses for the next semester
-2. Explain why each course is recommended
-3. Ensure prerequisites are met based on their completed courses
-4. Consider their graduation timeline
-5. Balance the course load appropriately (typically 12-15 credits minimum for full-time students)
-6. If they have additional notes/constraints, factor those into your recommendations
-
-Format your response in a clear, organized way with proper headings and sections.`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
+      const text = await aiService.generateRecommendations(profileData, courseCatalog);
       setSavedRecommendations({ recommendations: text, chatMessages: [] });
       showToast('Recommendations generated successfully!', 'success');
     } catch (err) {
@@ -1075,74 +1132,11 @@ Format your response in a clear, organized way with proper headings and sections
     setIsGeneratingRoadmap(true);
 
     try {
-      const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-      const coursesList = profileData.courses && profileData.courses.length > 0
-        ? profileData.courses.map(c => `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`).join('\n')
-        : '  - No courses completed yet';
-
-      const nextSemesterContext = savedRecommendations?.recommendations 
-        ? `\n\nIMPORTANT: For the FIRST semester in your roadmap, you should use these recommended courses as the foundation:\n${savedRecommendations.recommendations}\n\nYou may adjust slightly if needed, but try to keep the first semester consistent with these recommendations.`
-        : '';
-
-      const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU).
-
-Create a complete semester-by-semester roadmap for this student to graduate on time:
-
-Student Profile:
-- Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
-- Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
-- Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
-- Additional Notes/Requirements: ${profileData.additionalNotes || 'None'}
-- Total Credits Earned: ${profileData.totalCredits || 0}
-- Completed Courses:
-${coursesList}
-
-IMPORTANT: Pay special attention to the "Additional Notes/Requirements" - these may include scholarship requirements, work schedules, or other constraints that MUST be considered when planning the roadmap. Standard full-time enrollment is 12-15 credits per semester.${nextSemesterContext}
-
-Generate a semester-by-semester plan from now until their expected graduation. For each semester, list:
-- Semester name (e.g., "Fall 2024", "Spring 2025")
-- 4-5 courses with course codes, names, and credit hours
-- Total credits for that semester
-- Brief explanation of why these courses were chosen
-
-Also provide a summary at the end with:
-- Total remaining credits needed
-- Total number of semesters
-- Any important notes or warnings
-
-Format your response EXACTLY like this structure:
-
-## Fall 2024 (15 Credits)
-
-**CSCI 1234 - Course Name** (3 Credits)
-Brief explanation of why this course.
-
-**MATH 2345 - Another Course** (4 Credits)
-Brief explanation.
-
-(Continue for all courses in this semester)
-
-## Spring 2025 (16 Credits)
-
-(Same format)
-
----
-
-## Summary
-
-**Total Credits Needed:** XX
-**Semesters Remaining:** X
-**Notes:** Any important considerations
-
-Use this exact format with markdown headers (##) for each semester.`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
+      const text = await aiService.generateRoadmap(
+        profileData, 
+        courseCatalog, 
+        savedRecommendations?.recommendations
+      );
       setSavedRoadmap(text);
       showToast('Roadmap generated successfully!', 'success');
     } catch (err) {
@@ -1158,9 +1152,9 @@ Use this exact format with markdown headers (##) for each semester.`;
       case 'dashboard':
         return <Dashboard onNavigate={handleNavigation} profileData={profileData} />;
       case 'profile':
-        return <ProfileForm onSaveProfile={handleSaveProfile} existingProfile={tempProfileData || profileData} showToast={showToast} onTempUpdate={handleTempProfileUpdate} />;
+        return <ProfileForm onSaveProfile={handleSaveProfile} existingProfile={tempProfileData || profileData} showToast={showToast} onTempUpdate={handleTempProfileUpdate} courseCatalog={courseCatalog} />;
       case 'courses':
-        return <CourseCatalog profileData={profileData} />;
+        return <CourseCatalog profileData={profileData} courseCatalog={courseCatalog} isLoadingCourses={isLoadingCourses} />;
       case 'recommendations':
         return <Recommendations profileData={profileData} onNavigate={handleNavigation} savedData={savedRecommendations} onSaveData={setSavedRecommendations} onGenerate={generateRecommendations} isLoading={isGeneratingRecommendations} />;
       case 'roadmap':
