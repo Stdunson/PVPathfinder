@@ -131,8 +131,12 @@ export const parseTranscriptText = (text) => {
         }
       }
       
-      // Clean up course name
-      courseName = courseName.replace(/\s+/g, ' ').trim();
+      // Clean up course name - more aggressive
+      courseName = courseName
+        .replace(/\s+/g, ' ')  // Multiple spaces to single space
+        .replace(/\b(UG|GR|DR|Undergraduate|Graduate|Doctoral)\b/gi, '')  // Remove degree level anywhere
+        .replace(/\s+/g, ' ')  // Clean up again after removal
+        .trim();
       
       // Validate and add - ONLY add completed courses
       const creditsNum = parseInt(credits);
@@ -163,9 +167,28 @@ export const parseTranscriptText = (text) => {
     i++;
   }
   
-  console.log(`\nTotal: ${courses.length} courses`);
+  console.log(`\nBefore deduplication: ${courses.length} courses`);
+  
+  // DEDUPLICATE: Remove duplicate course entries
+  // Group by code-semester key
+  const uniqueCoursesMap = new Map();
+  
+  courses.forEach(course => {
+    const key = `${course.code.toUpperCase().trim()}-${course.semester.trim()}`;
+    
+    // Only keep first occurrence of each course
+    if (!uniqueCoursesMap.has(key)) {
+      uniqueCoursesMap.set(key, course);
+    } else {
+      console.log(`🗑️  REMOVED DUPLICATE: ${course.code} - ${course.semester}`);
+    }
+  });
+  
+  const uniqueCourses = Array.from(uniqueCoursesMap.values());
+  console.log(`After deduplication: ${uniqueCourses.length} courses`);
   console.log('=== END PARSER ===');
-  return courses;
+  
+  return uniqueCourses;
 };
 
 /**

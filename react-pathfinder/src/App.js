@@ -437,7 +437,7 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
       <div className="catalog-header">
         <h3 className="catalog-title">PVAMU Course Catalog</h3>
         <p className="catalog-description">
-          Browse Prairie View A&M University's complete course catalog with {courseCatalog.length.toLocaleString()}+ courses. Search by course code or name, and filter by department or degree level.
+          Browse Prairie View A&M University's complete course catalog. Search by course code or name, and filter by department or degree level.
         </p>
       </div>
 
@@ -498,8 +498,6 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
                   </div>
                   <div className="course-card-credits">{course.credits} {course.credits === 1 ? 'Credit' : 'Credits'}</div>
                 </div>
-
-                <p className="course-card-description">{course.description}</p>
 
                 <div className="course-card-footer">
                   <div className="course-card-meta">
@@ -574,6 +572,50 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
   const [showPreview, setShowPreview] = useState(false);
   const [isParsingTranscript, setIsParsingTranscript] = useState(false);
   const [parsedStudentInfo, setParsedStudentInfo] = useState(null);
+
+  // Reactive duplicate detection - recalculates when courses or parsedCourses change
+  const duplicateInfo = React.useMemo(() => {
+    console.log('\n=== DUPLICATE INFO CALCULATION ===');
+    console.log('Current courses count:', courses.length);
+    console.log('Parsed courses count:', parsedCourses.length);
+    
+    const normalizeCourseKey = (code, semester) => {
+      const normalizedCode = code.toUpperCase().trim().replace(/\s+/g, ' ');
+      const normalizedSemester = semester.trim().replace(/\s+/g, ' ');
+      return `${normalizedCode}|${normalizedSemester}`;
+    };
+    
+    const existingCourseKeys = new Set(
+      courses.map(c => normalizeCourseKey(c.code, c.semester))
+    );
+    
+    console.log('Existing course keys:', Array.from(existingCourseKeys));
+    
+    const duplicates = parsedCourses.filter(course => {
+      const key = normalizeCourseKey(course.code, course.semester);
+      const isDup = existingCourseKeys.has(key);
+      if (isDup) {
+        console.log(`  ⚠️ DUPLICATE: ${course.code} - ${course.semester} (key: ${key})`);
+      }
+      return isDup;
+    });
+    
+    const newCourses = parsedCourses.filter(course => 
+      !existingCourseKeys.has(normalizeCourseKey(course.code, course.semester))
+    );
+    
+    console.log('Duplicates found:', duplicates.length);
+    console.log('New courses:', newCourses.length);
+    console.log('=== END CALCULATION ===\n');
+    
+    return { 
+      duplicates, 
+      newCourses, 
+      existingCourseKeys,
+      normalizeCourseKey 
+    };
+  }, [courses, parsedCourses]);
+
 
   React.useEffect(() => {
     if (!initialData && existingProfile) {
@@ -682,7 +724,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     setNewCourse({ code: course.code, name: course.name, credits: course.credits, semester: course.semester, grade: course.grade });
     setSelectedCourseOption(null); // Clear autocomplete when editing
     setEditingCourse(index);
-    setShowAddCourse(true);
+    setShowAddCourse(false); // Close "Add Course" section when editing inline
   };
 
   const cancelEdit = () => {
@@ -765,7 +807,24 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
   };
 
   const handleImportCourses = () => {
-    setCourses(prev => [...prev, ...parsedCourses]);
+    console.log('=== DUPLICATE DETECTION DEBUG ===');
+    console.log('Existing courses:', courses.length);
+    console.log('Parsed courses:', parsedCourses.length);
+    
+    duplicateInfo.newCourses.forEach(course => {
+      console.log(`✓ NEW COURSE: ${course.code} - ${course.semester}`);
+    });
+    
+    duplicateInfo.duplicates.forEach(course => {
+      console.log(`⚠️ DUPLICATE DETECTED: ${course.code} - ${course.semester}`);
+    });
+    
+    const duplicatesCount = duplicateInfo.duplicates.length;
+    console.log(`Result: ${duplicateInfo.newCourses.length} new, ${duplicatesCount} duplicates`);
+    console.log('=== END DEBUG ===');
+    
+    // Add only non-duplicate courses
+    setCourses(prev => [...prev, ...duplicateInfo.newCourses]);
     
     // Apply parsed student info if available
     if (parsedStudentInfo) {
@@ -782,7 +841,22 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     setParsedCourses([]);
     setParsedStudentInfo(null);
     setTranscriptText('');
-    showToast(`Successfully imported ${parsedCourses.length} courses! Please review and adjust the auto-filled information.`, 'success');
+    
+    // Show appropriate success message
+    if (duplicatesCount > 0) {
+      showToast(
+        `Successfully imported ${duplicateInfo.newCourses.length} course${duplicateInfo.newCourses.length !== 1 ? 's' : ''}! ` +
+        `(${duplicatesCount} duplicate${duplicatesCount !== 1 ? 's' : ''} skipped) ` +
+        `Please review and adjust the auto-filled information.`,
+        'success'
+      );
+    } else {
+      showToast(
+        `Successfully imported ${duplicateInfo.newCourses.length} course${duplicateInfo.newCourses.length !== 1 ? 's' : ''}! ` +
+        `Please review and adjust the auto-filled information.`,
+        'success'
+      );
+    }
   };
 
   const cancelImport = () => {
@@ -1031,8 +1105,8 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
 
         {/* Preview Modal */}
         {showPreview && (
-          <div className="modal-overlay" onClick={cancelImport}>
-            <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '80vh', overflow: 'auto' }}>
+          <div className="modal-overlay">
+            <div className="modal" style={{ maxWidth: '700px', maxHeight: '80vh', overflow: 'auto' }}>
               <h3 className="modal-title">Preview Imported Courses</h3>
               
               {parsedStudentInfo && (parsedStudentInfo.name || parsedStudentInfo.major || parsedStudentInfo.expectedGraduation) && (
@@ -1062,8 +1136,40 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
               )}
 
               <p className="modal-message">
-                Found <strong>{parsedCourses.length} courses</strong>. Review and confirm to import them.
+                Found <strong>{parsedCourses.length} courses</strong>.
+                {duplicateInfo.duplicates.length > 0 && (
+                  <span style={{ color: '#f59e0b', fontWeight: '600' }}>
+                    {' '}{duplicateInfo.duplicates.length} duplicate{duplicateInfo.duplicates.length !== 1 ? 's' : ''} will be skipped.
+                  </span>
+                )}
+                {' '}Review and confirm to import.
               </p>
+              
+              {duplicateInfo.duplicates.length > 0 && (
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  border: '1px solid #fbbf24',
+                  borderRadius: '6px',
+                  padding: '12px',
+                  marginBottom: '16px',
+                  fontSize: '13px'
+                }}>
+                  <p style={{ fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
+                    ⚠️ {duplicateInfo.duplicates.length} Duplicate{duplicateInfo.duplicates.length !== 1 ? 's' : ''} Detected
+                  </p>
+                  <p style={{ color: '#92400e' }}>
+                    The following course{duplicateInfo.duplicates.length !== 1 ? 's are' : ' is'} already in your list and will be skipped:
+                  </p>
+                  <ul style={{ marginTop: '8px', marginLeft: '20px', color: '#92400e' }}>
+                    {duplicateInfo.duplicates.slice(0, 3).map((course, idx) => (
+                      <li key={idx}>{course.code} - {course.semester}</li>
+                    ))}
+                    {duplicateInfo.duplicates.length > 3 && (
+                      <li>...and {duplicateInfo.duplicates.length - 3} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
               
               <div style={{ 
                 maxHeight: '300px', 
@@ -1074,21 +1180,29 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
                 marginBottom: '20px',
                 backgroundColor: '#f9fafb'
               }}>
-                {parsedCourses.map((course, index) => (
-                  <div key={index} style={{ 
-                    padding: '8px', 
-                    borderBottom: '1px solid #e5e7eb',
-                    fontSize: '13px'
-                  }}>
-                    <strong>{course.code}</strong> - {course.name} ({course.credits} cr, {course.semester}, Grade: {course.grade})
-                  </div>
-                ))}
+                {parsedCourses.map((course, index) => {
+                  const isDuplicate = duplicateInfo.existingCourseKeys.has(duplicateInfo.normalizeCourseKey(course.code, course.semester));
+                  return (
+                    <div key={index} style={{ 
+                      padding: '8px', 
+                      borderBottom: '1px solid #e5e7eb',
+                      fontSize: '13px',
+                      opacity: isDuplicate ? 0.5 : 1,
+                      textDecoration: isDuplicate ? 'line-through' : 'none'
+                    }}>
+                      {isDuplicate && <span style={{ color: '#f59e0b', marginRight: '6px' }}>⚠️</span>}
+                      <strong>{course.code}</strong> - {course.name} ({course.credits} cr, {course.semester}, Grade: {course.grade})
+                      {isDuplicate && <span style={{ color: '#f59e0b', marginLeft: '6px', fontSize: '11px' }}>(duplicate)</span>}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="modal-actions">
                 <button className="modal-button secondary" onClick={cancelImport}>Cancel</button>
                 <button className="modal-button primary" style={{ backgroundColor: '#4f2d7f' }} onClick={handleImportCourses}>
-                  Import {parsedCourses.length} Courses
+                  Import {duplicateInfo.newCourses.length} Course{duplicateInfo.newCourses.length !== 1 ? 's' : ''}
+                  {duplicateInfo.duplicates.length > 0 && ` (Skip ${duplicateInfo.duplicates.length})`}
                 </button>
               </div>
             </div>
@@ -1100,55 +1214,98 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
             <p className="placeholder-text">No courses added yet.</p>
           ) : (
             courses.map((course, index) => (
-              <div key={course.id} className="course-item">
-                <div className="course-info">
-                  <div className="course-code">{course.code} - {course.name}</div>
-                  <div className="course-details">{course.credits} credits • {course.semester} • Grade: {course.grade}</div>
+              <React.Fragment key={course.id}>
+                <div className="course-item">
+                  <div className="course-info">
+                    <div className="course-code">{course.code} - {course.name}</div>
+                    <div className="course-details">{course.credits} credits • {course.semester} • Grade: {course.grade}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => editCourse(index)} className="secondary-button" style={{ padding: '6px 12px', margin: 0 }}>Edit</button>
+                    <button onClick={() => setShowDeleteConfirm(course.id)} className="remove-button">Remove</button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => editCourse(index)} className="secondary-button" style={{ padding: '6px 12px', margin: 0 }}>Edit</button>
-                  <button onClick={() => setShowDeleteConfirm(course.id)} className="remove-button">Remove</button>
-                </div>
-              </div>
+                
+                {/* Inline Edit Form - appears right below the course being edited */}
+                {editingCourse === index && (
+                  <div className="add-course-section" style={{ marginTop: '8px', marginBottom: '16px' }}>
+                    <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>Edit Course</h4>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Course Code</label>
+                        <input type="text" name="code" value={newCourse.code} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., COMP 1336" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Course Name</label>
+                        <input type="text" name="name" value={newCourse.name} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Computer Science I" />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">Credits</label>
+                        <input type="number" name="credits" value={newCourse.credits} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., 3" />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Semester Taken</label>
+                        <Select
+                          name="semester"
+                          value={semesterOptions.find(option => option.value === newCourse.semester) || null}
+                          onChange={(option) => setNewCourse(prev => ({ ...prev, semester: option ? option.value : '' }))}
+                          options={semesterOptions}
+                          placeholder="Select semester..."
+                          isClearable
+                          isSearchable
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label className="form-label">Grade</label>
+                      <Select
+                        name="grade"
+                        value={gradeOptions.find(option => option.value === newCourse.grade) || null}
+                        onChange={(option) => setNewCourse(prev => ({ ...prev, grade: option ? option.value : '' }))}
+                        options={gradeOptions}
+                        placeholder="Select grade..."
+                        isClearable
+                        isSearchable
+                      />
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button onClick={addCourse} className="primary-button">Update Course</button>
+                      <button onClick={cancelEdit} className="secondary-button">Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
             ))
           )}
         </div>
 
-        {!showAddCourse ? (
-          <button onClick={() => setShowAddCourse(true)} className="primary-button" style={{ marginTop: '16px' }}>+ Add Course</button>
-        ) : (
+        {/* Add Course Section - Only for adding NEW courses */}
+        {!showAddCourse && editingCourse === null ? (
+          <button onClick={() => { setShowAddCourse(true); setEditingCourse(null); }} className="primary-button" style={{ marginTop: '16px' }}>+ Add Course</button>
+        ) : editingCourse === null ? (
           <div className="add-course-section">
-            <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>{editingCourse !== null ? 'Edit Course' : 'Add New Course'}</h4>
+            <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>Add New Course</h4>
             
-            {editingCourse === null && (
-              <div className="form-group">
-                <label className="form-label">Search for Course</label>
-                <Select
-                  value={selectedCourseOption}
-                  onChange={handleCourseSelect}
-                  options={courseOptions}
-                  placeholder="Type to search (e.g., COMP 1336, Calculus, Biology)..."
-                  isClearable
-                  isSearchable
-                  noOptionsMessage={() => "No courses found"}
-                />
-              </div>
-            )}
+            <div className="form-group">
+              <label className="form-label">Search for Course</label>
+              <Select
+                value={selectedCourseOption}
+                onChange={handleCourseSelect}
+                options={courseOptions}
+                placeholder="Type to search (e.g., COMP 1336, Calculus, Biology)..."
+                isClearable
+                isSearchable
+                noOptionsMessage={() => "No courses found"}
+              />
+            </div>
 
-            {editingCourse !== null && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Course Code</label>
-                  <input type="text" name="code" value={newCourse.code} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., COMP 1336" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Course Name</label>
-                  <input type="text" name="name" value={newCourse.name} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Computer Science I" />
-                </div>
-              </div>
-            )}
-
-            {selectedCourseOption && editingCourse === null && (
+            {selectedCourseOption && (
               <div style={{ 
                 backgroundColor: '#f0fdf4', 
                 border: '1px solid #86efac', 
@@ -1165,15 +1322,6 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
               </div>
             )}
 
-            {editingCourse !== null && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Credits</label>
-                  <input type="number" name="credits" value={newCourse.credits} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., 3" />
-                </div>
-              </div>
-            )}
-
             <div className="form-group">
               <label className="form-label">Semester Taken</label>
               <Select
@@ -1186,7 +1334,6 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
                 isSearchable
               />
             </div>
-            
             
             <div className="form-group">
               <label className="form-label">Grade</label>
@@ -1201,11 +1348,11 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
               />
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={addCourse} className="primary-button">{editingCourse !== null ? 'Update Course' : 'Add Course'}</button>
+              <button onClick={addCourse} className="primary-button">Add Course</button>
               <button onClick={cancelEdit} className="secondary-button">Cancel</button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="form-actions">
@@ -1554,15 +1701,35 @@ function App() {
             'SUPV': 'Supervision', 'AFSC': 'Air Force ROTC'
           };
           
+          // LIGHT VALIDATION (for clean JSON file)
+          // Just basic sanity checks - no heavy corruption detection needed!
+          
+          const validLevels = ["Bachelor's", "Master's", "Doctoral", "Executive Master's"];
+          
+          let degreeLevel = course.degree_level;
+          let creditHours = course.credit_hours;
+          
+          // Safety check: if degree_level is not valid, default to Bachelor's
+          if (!validLevels.includes(degreeLevel)) {
+            console.warn(`⚠️ Invalid degree level for ${course.course_code}: "${degreeLevel}" - defaulting to Bachelor's`);
+            degreeLevel = "Bachelor's";
+          }
+          
+          // Safety check: if credit_hours is invalid, log warning
+          const credits = parseInt(creditHours);
+          if (isNaN(credits) || credits < 0 || credits > 6) {
+            console.warn(`⚠️ Invalid credit hours for ${course.course_code}: "${creditHours}"`);
+          }
+          
           return {
             id: course.id,
             code: course.course_code,
             name: course.title,
-            credits: parseInt(course.credit_hours) || 0,
+            credits: parseInt(creditHours) || 0,
             department: departmentNames[departmentCode] || departmentCode,
             description: course.title,
             prerequisites: course.prerequisites === 'NULL' ? 'None' : course.prerequisites,
-            degreeLevel: course.degree_level,
+            degreeLevel: degreeLevel,
             coRequisites: course.co_requisites === 'NULL' ? 'None' : course.co_requisites
           };
         });
@@ -1709,4 +1876,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

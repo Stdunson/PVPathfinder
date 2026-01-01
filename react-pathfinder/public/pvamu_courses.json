@@ -122,9 +122,8 @@
     "title": "Accounting Information Systems",
     "credit_hours": "3",
     "prerequisites": "ACCT 2302",
-    "degree_level": "MISY 2301",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MISY 2301"
   },
   {
     "id": "15",
@@ -141,9 +140,8 @@
     "title": "Accounting Data Analytics",
     "credit_hours": "3",
     "prerequisites": "ACCT 2302",
-    "degree_level": "MGMT 3013",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 3013"
   },
   {
     "id": "17",
@@ -151,9 +149,8 @@
     "title": "Financial Statement Analysis",
     "credit_hours": "3",
     "prerequisites": "ACCT 3321",
-    "degree_level": "FINA 3310",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "FINA 3310"
   },
   {
     "id": "18",
@@ -212,12 +209,11 @@
   {
     "id": "24",
     "course_code": "ACCT 5315",
-    "title": "Seminar on Tax Consulting",
-    "credit_hours": "Planning and Research",
-    "prerequisites": "3",
-    "degree_level": "ACCT 3333",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Seminar on Tax Consulting Planning and Research",
+    "credit_hours": "3",
+    "prerequisites": "ACCT 3333",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "25",
@@ -276,13 +272,11 @@
   {
     "id": "31",
     "course_code": "AFAM 3301",
-    "title": "Race",
-    "credit_hours": "Gender",
-    "prerequisites": "and the Body as Spectacle",
-    "degree_level": "3",
-    "co_requisites": "AFAM 1301",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "title": "Race Gender and the Body as Spectacle",
+    "credit_hours": "3",
+    "prerequisites": "AFAM 1301",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "32",
@@ -296,13 +290,11 @@
   {
     "id": "33",
     "course_code": "AFAM 3303",
-    "title": "Race",
-    "credit_hours": "Place",
-    "prerequisites": "and Inequality",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "title": "Race Place and Inequality",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "34",
@@ -310,9 +302,8 @@
     "title": "Seminar in African American Studies",
     "credit_hours": "3",
     "prerequisites": "AFAM 2302",
-    "degree_level": "HIST 3301",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "HIST 3301"
   },
   {
     "id": "35",
@@ -320,9 +311,8 @@
     "title": "Internship in Public History",
     "credit_hours": "3",
     "prerequisites": "AFAM 2302",
-    "degree_level": "HIST 3301",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "HIST 3301"
   },
   {
     "id": "36",
@@ -402,9 +392,8 @@
     "title": "Agricultural Policy",
     "credit_hours": "3",
     "prerequisites": "AGRI 2321 or AGEC 2213",
-    "degree_level": "AGEC 3322 or AGEC 3223 (may be taken concurrently)",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "AGEC 3322 or AGEC 3223 (may be taken concurrently)"
   },
   {
     "id": "45",
@@ -412,9 +401,8 @@
     "title": "Agricultural Financial Analysis",
     "credit_hours": "3",
     "prerequisites": "AGEC 3321 or AGEC 3213",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "46",
@@ -422,9 +410,8 @@
     "title": "International Trade and Logistics",
     "credit_hours": "3",
     "prerequisites": "AGRI 2317 or AGEC 1233 or ECON 2113 or ECON 2302",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "47",
@@ -441,9 +428,8 @@
     "title": "Agribusiness Management",
     "credit_hours": "3",
     "prerequisites": "AGRI 2317 or AGEC 1233 or ECON 2113 or ECON 2302",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "49",
@@ -451,9 +437,8 @@
     "title": "Land and Resource Economics",
     "credit_hours": "3",
     "prerequisites": "AGEC 2317 or AGEC 1233 or ECON 2113 or ECON 2302",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "50",
@@ -461,9 +446,8 @@
     "title": "Agricultural Prices",
     "credit_hours": "3",
     "prerequisites": "AGEC 1233 or AGRI 2317 or ECON 2113 or ECON 2302",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "51",
@@ -738,13 +722,11 @@
   {
     "id": "81",
     "course_code": "AGRO 5375",
-    "title": "Soils",
-    "credit_hours": "Ecology",
-    "prerequisites": "and Land Uses",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Soils Ecology and Land Uses",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "82",
@@ -2081,12 +2063,11 @@
   {
     "id": "230",
     "course_code": "CHEG 1101",
-    "title": "Intro Engr",
-    "credit_hours": "Comp Sci & Tech",
-    "prerequisites": "1",
-    "degree_level": "NULL",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "CHEG 1102"
+    "title": "Intro Engr Comp Sci & Tech",
+    "credit_hours": "1",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "231",
@@ -2724,10 +2705,8 @@
     "title": "Senior Design and Professionalism - I",
     "credit_hours": "2",
     "prerequisites": "CVEG 3300 or CVEG 3023",
-    "degree_level": "CVEG 3301 or CVEG 3043",
-    "co_requisites": "CVEG 3302 or CVEG 3053",
-    "RIMARY": "CVEG 3303 or CVEG 3063",
-    "NIQUE": "CVEG 3304 or CVEG 3073"
+    "degree_level": "Bachelor's",
+    "co_requisites": "CVEG 3301 or CVEG 3043"
   },
   {
     "id": "432",
@@ -2744,9 +2723,8 @@
     "title": "Reinforced Concrete",
     "credit_hours": "3",
     "prerequisites": "CVEG 3100 or CVEG 3031",
-    "degree_level": "CVEG 3073 or CVEG 3304",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "CVEG 3073 or CVEG 3304"
   },
   {
     "id": "434",
@@ -2781,9 +2759,8 @@
     "title": "Systems Engineering",
     "credit_hours": "3",
     "prerequisites": "MATH 3302 or MATH 3023",
-    "degree_level": "CVEG 3302 or CVEG 3053",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "CVEG 3302 or CVEG 3053"
   },
   {
     "id": "438",
@@ -3175,12 +3152,11 @@
   {
     "id": "481",
     "course_code": "CPSY 7389",
-    "title": "Multicultural Issues in Clinical Psychology: Theory",
-    "credit_hours": "Research and Practice",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Multicultural Issues in Clinical Psychology: Theory Research and Practice",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "482",
@@ -3251,9 +3227,8 @@
     "title": "Internship I",
     "credit_hours": "1",
     "prerequisites": "CPSY 7382",
-    "degree_level": "CPSY 7383",
-    "co_requisites": "Doctoral",
-    "RIMARY": "NULL"
+    "degree_level": "Doctoral",
+    "co_requisites": "CPSY 7383"
   },
   {
     "id": "490",
@@ -3465,13 +3440,11 @@
   {
     "id": "513",
     "course_code": "COMM 2355",
-    "title": "Communication",
-    "credit_hours": "Globalization",
-    "prerequisites": "International Media",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "title": "Communication Globalization International Media",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "514",
@@ -3818,12 +3791,11 @@
   {
     "id": "552",
     "course_code": "CODE 5308",
-    "title": "Community Analysis",
-    "credit_hours": "Demography and GIS",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Community Analysis Demography and GIS",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "553",
@@ -3855,12 +3827,11 @@
   {
     "id": "556",
     "course_code": "CODE 5321",
-    "title": "Negotiation",
-    "credit_hours": "Mediation and Facilitation",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Negotiation Mediation and Facilitation",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "557",
@@ -5620,12 +5591,11 @@
   {
     "id": "752",
     "course_code": "CRIJ 3365",
-    "title": "Drugs",
-    "credit_hours": "Crime and Society",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "Drugs Crime and Society",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "753",
@@ -6300,8 +6270,7 @@
     "credit_hours": "3",
     "prerequisites": "ARTS 1311 or ARTS 1113 and ARTS 1312 or ARTS 1123 and ARTS 1316 or ARTS 1153 and ARTS 2311 or ARTS 2353 and ARTS 2336 or ARTS 2363",
     "degree_level": "Bachelor's",
-    "co_requisites": "DGMA 3332",
-    "RIMARY": "DGMA 3334"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "828",
@@ -6310,8 +6279,7 @@
     "credit_hours": "3",
     "prerequisites": "DGMA 3312 or DGMA 3123",
     "degree_level": "Bachelor's",
-    "co_requisites": "DGMA 3333",
-    "RIMARY": "DGMA 3335"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "829",
@@ -6320,8 +6288,7 @@
     "credit_hours": "3",
     "prerequisites": "ARTS 1311 or ARTS 1113 and ARTS 1312 or ARTS 1123 and ARTS 1316 or ARTS 1153 and ARTS 2311 or ARTS 2353 and ARTS 2336 or ARTS 2363",
     "degree_level": "Bachelor's",
-    "co_requisites": "DGMA 3312",
-    "RIMARY": "DGMA 3334"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "830",
@@ -6330,8 +6297,7 @@
     "credit_hours": "3",
     "prerequisites": "DGMA 3323 or DGMA 3332",
     "degree_level": "Bachelor's",
-    "co_requisites": "DGMA 3313",
-    "RIMARY": "DGMA 3335"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "831",
@@ -6912,12 +6878,11 @@
   {
     "id": "895",
     "course_code": "ADMN 5301",
-    "title": "Educational Administration: Theory",
-    "credit_hours": "Practice and Research",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Educational Administration: Theory Practice and Research",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "896",
@@ -7102,24 +7067,20 @@
   {
     "id": "916",
     "course_code": "ADMN 5326",
-    "title": "Theories",
-    "credit_hours": "Foundations",
-    "prerequisites": "and Functions in Student Affairs",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Theories Foundations and Functions in Student Affairs",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "917",
     "course_code": "ADMN 5327",
-    "title": "Research",
-    "credit_hours": "Evaluation",
-    "prerequisites": "and Data Analysis in Schools",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Research Evaluation and Data Analysis in Schools",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "918",
@@ -7331,12 +7292,11 @@
   {
     "id": "941",
     "course_code": "EDUL 7352",
-    "title": "Teacher Supervision",
-    "credit_hours": "Evaluation and Professional Development",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Doctoral",
-    "RIMARY": "NULL"
+    "title": "Teacher Supervision Evaluation and Professional Development",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Doctoral",
+    "co_requisites": "NULL"
   },
   {
     "id": "942",
@@ -7413,22 +7373,20 @@
   {
     "id": "950",
     "course_code": "EDUL 7376",
-    "title": "Institutional Effectiveness",
-    "credit_hours": "Assessment and Accreditation",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Doctoral",
-    "RIMARY": "NULL"
+    "title": "Institutional Effectiveness Assessment and Accreditation",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Doctoral",
+    "co_requisites": "NULL"
   },
   {
     "id": "951",
     "course_code": "EDUL 7377",
-    "title": "College Teaching Theories",
-    "credit_hours": "Models and Strategies",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Doctoral",
-    "RIMARY": "NULL"
+    "title": "College Teaching Theories Models and Strategies",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Doctoral",
+    "co_requisites": "NULL"
   },
   {
     "id": "952",
@@ -7670,10 +7628,8 @@
     "title": "Logic Circuits",
     "credit_hours": "3",
     "prerequisites": "ELEG 2131",
-    "degree_level": "ELEG 2305",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "ELEG 2131",
-    "NIQUE": "ELEG 2305"
+    "degree_level": "Bachelor's",
+    "co_requisites": "ELEG 2305"
   },
   {
     "id": "979",
@@ -8668,12 +8624,11 @@
   {
     "id": "1089",
     "course_code": "ELET 3152",
-    "title": "Instrumentation",
-    "credit_hours": "Robotics and Controls Lab",
-    "prerequisites": "1",
-    "degree_level": "ELET 2122 or ELET 2221 and (ELET 2223 or ELET 2322) and (PHYS 1302 or PHYS 2123) and ELET 3352 (may be taken concurrently)",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "Instrumentation Robotics and Controls Lab",
+    "credit_hours": "1",
+    "prerequisites": "ELET 2122 or ELET 2221 and (ELET 2223 or ELET 2322) and (PHYS 1302 or PHYS 2123) and ELET 3352 (may be taken concurrently)",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1090",
@@ -8705,12 +8660,11 @@
   {
     "id": "1093",
     "course_code": "ELET 3352",
-    "title": "Instrumentation",
-    "credit_hours": "Robotics and Controls",
-    "prerequisites": "3",
-    "degree_level": "ELET 2122 or ELET 2221 and (ELET 2322 or ELET 2223) and (PHYS 2123 or PHYS 1302) and ELET 3152 (may be taken concurrently)",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "Instrumentation Robotics and Controls",
+    "credit_hours": "3",
+    "prerequisites": "ELET 2122 or ELET 2221 and (ELET 2322 or ELET 2223) and (PHYS 2123 or PHYS 1302) and ELET 3152 (may be taken concurrently)",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1094",
@@ -9525,13 +9479,11 @@
   {
     "id": "1184",
     "course_code": "GNEG 1101",
-    "title": "Introduction to Engineering",
-    "credit_hours": "Computer Science",
-    "prerequisites": "and Technology",
-    "degree_level": "1",
-    "co_requisites": "ELEG 1102",
-    "RIMARY": "MATH 1314",
-    "NIQUE": "MATH 1316"
+    "title": "Introduction to Engineering Computer Science and Technology",
+    "credit_hours": "1",
+    "prerequisites": "ELEG 1102",
+    "degree_level": "MATH 1314",
+    "co_requisites": "NULL"
   },
   {
     "id": "1185",
@@ -10049,12 +10001,11 @@
   {
     "id": "1242",
     "course_code": "HKIN 1306",
-    "title": "First Aid",
-    "credit_hours": "Safety and CPR",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "First Aid Safety and CPR",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1243",
@@ -10080,9 +10031,8 @@
     "title": "Exercise Physiology",
     "credit_hours": "3",
     "prerequisites": "KINE 3023 or HKIN 3302",
-    "degree_level": "MATH 1113 or MATH 1314",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1113 or MATH 1314"
   },
   {
     "id": "1246",
@@ -10141,12 +10091,11 @@
   {
     "id": "1252",
     "course_code": "HLTH 2303",
-    "title": "Aging",
-    "credit_hours": "Death and Dying",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "Aging Death and Dying",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1253",
@@ -11126,10 +11075,8 @@
     "title": "Marriage and Family Therapy Practicum I",
     "credit_hours": "3",
     "prerequisites": "HUSC 5339 or HUSC 5393",
-    "degree_level": "HUSC 5351 or HUSC 5533",
-    "co_requisites": "HUSC 5354 or HUSC 5543",
-    "RIMARY": "HUSC 5355 or HUSC 5553",
-    "NIQUE": "Master's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "HUSC 5351 or HUSC 5533"
   },
   {
     "id": "1362",
@@ -11182,10 +11129,8 @@
     "title": "Thesis",
     "credit_hours": "3",
     "prerequisites": "HUSC 5393 or HUSC 5339",
-    "degree_level": "HUSC 5543 or HUSC 5354",
-    "co_requisites": "HUSC 5553 or HUSC 5355",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "HUSC 5543 or HUSC 5354"
   },
   {
     "id": "1368",
@@ -11568,12 +11513,11 @@
   {
     "id": "1410",
     "course_code": "JJUS 7366",
-    "title": "Drugs",
-    "credit_hours": "Youth and Society",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Doctoral",
-    "RIMARY": "NULL"
+    "title": "Drugs Youth and Society",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Doctoral",
+    "co_requisites": "NULL"
   },
   {
     "id": "1411",
@@ -11605,13 +11549,11 @@
   {
     "id": "1414",
     "course_code": "JJUS 7374",
-    "title": "Race",
-    "credit_hours": "Ethnicity",
-    "prerequisites": "Gender and Juvenile Justice",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Doctoral",
-    "NIQUE": "NULL"
+    "title": "Race Ethnicity Gender and Juvenile Justice",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Doctoral",
+    "co_requisites": "NULL"
   },
   {
     "id": "1415",
@@ -12294,9 +12236,8 @@
     "title": "Quantitative Business Analysis",
     "credit_hours": "3",
     "prerequisites": "MATH 1314",
-    "degree_level": "MATH 1324",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MATH 1324"
   },
   {
     "id": "1491",
@@ -12385,9 +12326,8 @@
     "title": "Project Management",
     "credit_hours": "3",
     "prerequisites": "MGMT 3301",
-    "degree_level": "MGMT 3310",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 3310"
   },
   {
     "id": "1501",
@@ -12449,10 +12389,8 @@
     "title": "Strategic Management and Business Policy",
     "credit_hours": "3",
     "prerequisites": "MGMT 3310",
-    "degree_level": "MRKT 3310",
-    "co_requisites": "FINA 3310",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MRKT 3310"
   },
   {
     "id": "1508",
@@ -12460,9 +12398,8 @@
     "title": "Supply Chain Management",
     "credit_hours": "3",
     "prerequisites": "MGMT 3310",
-    "degree_level": "MGMT 3301",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 3301"
   },
   {
     "id": "1509",
@@ -12470,9 +12407,8 @@
     "title": "Production and Operations Management",
     "credit_hours": "3",
     "prerequisites": "MGMT 3301",
-    "degree_level": "MGMT 3310",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 3310"
   },
   {
     "id": "1510",
@@ -12516,10 +12452,8 @@
     "title": "International Environment of Business",
     "credit_hours": "3",
     "prerequisites": "MRKT 3310",
-    "degree_level": "MGMT 3310",
-    "co_requisites": "ECON 2302",
-    "RIMARY": "ECON 2301",
-    "NIQUE": "Bachelor's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 3310"
   },
   {
     "id": "1515",
@@ -12545,9 +12479,8 @@
     "title": "ERP Apps in Supply Chain",
     "credit_hours": "3",
     "prerequisites": "MGMT 3301",
-    "degree_level": "MGMT 4333",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "MGMT 4333"
   },
   {
     "id": "1518",
@@ -12591,10 +12524,8 @@
     "title": "Strategy and Policy",
     "credit_hours": "3",
     "prerequisites": "ACCT 5310",
-    "degree_level": "BCOM 5320",
-    "co_requisites": "ECON 5310",
-    "RIMARY": "FINA 5310",
-    "NIQUE": "MRKT 5330"
+    "degree_level": "Bachelor's",
+    "co_requisites": "BCOM 5320"
   },
   {
     "id": "1523",
@@ -12689,13 +12620,11 @@
   {
     "id": "1577",
     "course_code": "MRKT 3311",
-    "title": "Sports",
-    "credit_hours": "Entertainment",
-    "prerequisites": "and Event Marketing",
-    "degree_level": "3",
-    "co_requisites": "MRKT 3310 or MRKT 3103",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "title": "Sports Entertainment and Event Marketing",
+    "credit_hours": "3",
+    "prerequisites": "MRKT 3310 or MRKT 3103",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1578",
@@ -12857,9 +12786,7 @@
     "credit_hours": "0",
     "prerequisites": "TSI Math with a score of 347",
     "degree_level": "Bachelor's",
-    "co_requisites": "MATH 1314",
-    "RIMARY": "MATH 1332",
-    "NIQUE": "PSYC 2317"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "1596",
@@ -12945,12 +12872,11 @@
   {
     "id": "1605",
     "course_code": "MATH 1325",
-    "title": "Calculus-Business",
-    "credit_hours": "Life and Social Sciences",
-    "prerequisites": "3",
-    "degree_level": "MATH 1324 or MATH 1153",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "title": "Calculus-Business Life and Social Sciences",
+    "credit_hours": "3",
+    "prerequisites": "MATH 1324 or MATH 1153",
+    "degree_level": "Bachelor's",
+    "co_requisites": "NULL"
   },
   {
     "id": "1606",
@@ -13138,10 +13064,8 @@
     "title": "Independent Study",
     "credit_hours": "1",
     "prerequisites": "Reading",
-    "degree_level": "research",
-    "co_requisites": "and/or field work on selected topics",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "research"
   },
   {
     "id": "1627",
@@ -13221,10 +13145,8 @@
     "title": "Independent Study",
     "credit_hours": "1",
     "prerequisites": "Reading",
-    "degree_level": "research",
-    "co_requisites": "and/or field work on selected topics",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "research"
   },
   {
     "id": "1636",
@@ -15095,10 +15017,8 @@
     "title": "Tools For Success",
     "credit_hours": "2",
     "prerequisites": "HIST 1301 or HIST 1313",
-    "degree_level": "HIST 1302 or HIST 1323",
-    "co_requisites": "SOCG 1301 or SOCG 1013",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "HIST 1302 or HIST 1323"
   },
   {
     "id": "2095",
@@ -15106,10 +15026,8 @@
     "title": "Introduction to Pharmacology",
     "credit_hours": "3",
     "prerequisites": "NURS 3416 or NURS 3164",
-    "degree_level": "NURS 3326 or NURS 3263",
-    "co_requisites": "MATH 1314 or MATH 1113",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3326 or NURS 3263"
   },
   {
     "id": "2096",
@@ -15117,10 +15035,8 @@
     "title": "Individual Health Assessment",
     "credit_hours": "3",
     "prerequisites": "BIOL 1307 or BIOL 1073",
-    "degree_level": "CHEM 1306 or CHEM 1053",
-    "co_requisites": "CHEM 1106 or CHEM 1051",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "CHEM 1306 or CHEM 1053"
   },
   {
     "id": "2097",
@@ -15128,10 +15044,8 @@
     "title": "Basic Pathophysiology",
     "credit_hours": "3",
     "prerequisites": "BIOL 1307 or BIOL 1073",
-    "degree_level": "CHEM 1306 or CHEM 1053",
-    "co_requisites": "CHEM 1106 or CHEM 1051",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "CHEM 1306 or CHEM 1053"
   },
   {
     "id": "2098",
@@ -15139,10 +15053,8 @@
     "title": "Basic Concepts of Nursing Practicum",
     "credit_hours": "3",
     "prerequisites": "BIOL 2401 or BIOL 1054",
-    "degree_level": "BIOL 2402 or BIOL 1064",
-    "co_requisites": "BIOL 1307 or BIOL 1073",
-    "RIMARY": "CHEM 1306 or CHEM 1053",
-    "NIQUE": "CHEM 1106 or CHEM 1051"
+    "degree_level": "Bachelor's",
+    "co_requisites": "BIOL 2402 or BIOL 1064"
   },
   {
     "id": "2099",
@@ -15150,9 +15062,8 @@
     "title": "Adult Health Nursing I Practicum",
     "credit_hours": "3",
     "prerequisites": "NURS 3416 or NURS 3164",
-    "degree_level": "NURS 3326 or NURS 3263",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3326 or NURS 3263"
   },
   {
     "id": "2100",
@@ -15169,9 +15080,8 @@
     "title": "Camp Nursing: Care of Special Populations",
     "credit_hours": "3",
     "prerequisites": "NURS 3417 or NURS 3174",
-    "degree_level": "NURS 3300 or NURS 3003",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3300 or NURS 3003"
   },
   {
     "id": "2102",
@@ -15215,10 +15125,8 @@
     "title": "Basic Concepts of Nursing",
     "credit_hours": "4",
     "prerequisites": "BIOL 1307 or BIOL 1073",
-    "degree_level": "BIOL 2401 or BIOL 1054",
-    "co_requisites": "BIOL 2402 or BIOL 1064",
-    "RIMARY": "HUSC 1322 or HUSC 1343",
-    "NIQUE": "Bachelor's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "BIOL 2401 or BIOL 1054"
   },
   {
     "id": "2107",
@@ -15226,10 +15134,8 @@
     "title": "Adult Health Nursing I",
     "credit_hours": "4",
     "prerequisites": "NURS 3300 or NURS 3003",
-    "degree_level": "NURS 3302 or NURS 3023",
-    "co_requisites": "NURS 3416 or NURS 3164",
-    "RIMARY": "NURS 3326 or NURS 3263",
-    "NIQUE": "NURS 3301 or NURS 3013"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3302 or NURS 3023"
   },
   {
     "id": "2108",
@@ -15237,10 +15143,8 @@
     "title": "Family Health Nursing Practicum",
     "credit_hours": "4",
     "prerequisites": "NURS 3417 or NURS 3174",
-    "degree_level": "NURS 3300 or NURS 3003",
-    "co_requisites": "NURS 3327 or NURS 3273",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3300 or NURS 3003"
   },
   {
     "id": "2109",
@@ -15248,9 +15152,8 @@
     "title": "Transition to Professional Nursing",
     "credit_hours": "5",
     "prerequisites": "BIOL 2401 or BIOL 1054",
-    "degree_level": "BIOL 2402 or BIOL 1065",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "BIOL 2402 or BIOL 1065"
   },
   {
     "id": "2110",
@@ -15258,9 +15161,8 @@
     "title": "Family Health Nursing",
     "credit_hours": "5",
     "prerequisites": "NURS 3417 or NURS 3174",
-    "degree_level": "NURS 3327 or NURS 3273",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3327 or NURS 3273"
   },
   {
     "id": "2111",
@@ -15277,9 +15179,8 @@
     "title": "Mental Health Nursing Practicum",
     "credit_hours": "2",
     "prerequisites": "NURS 3518 or NURS 3185",
-    "degree_level": "NURS 3428 or NURS 3284",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3428 or NURS 3284"
   },
   {
     "id": "2113",
@@ -15287,10 +15188,8 @@
     "title": "Community Health Nursing Practicum",
     "credit_hours": "2",
     "prerequisites": "NURS 4318 or NURS 4183",
-    "degree_level": "NURS 4316 or NURS 4163",
-    "co_requisites": "NURS 4226 or NURS 4262",
-    "RIMARY": "NURS 4228 or NURS 4282",
-    "NIQUE": "Bachelor's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 4316 or NURS 4163"
   },
   {
     "id": "2114",
@@ -15298,9 +15197,8 @@
     "title": "Adult Health Nursing II Practicum",
     "credit_hours": "2",
     "prerequisites": "NURS 3518 or NURS 3185",
-    "degree_level": "NURS 3428 or NURS 3284",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3428 or NURS 3284"
   },
   {
     "id": "2115",
@@ -15308,10 +15206,8 @@
     "title": "Nursing Leadership and Management Practicum",
     "credit_hours": "2",
     "prerequisites": "NURS 4318 or NURS 4183",
-    "degree_level": "NURS 4316 or NURS 4163",
-    "co_requisites": "NURS 4226 or NURS 4262",
-    "RIMARY": "NURS 4228 or NURS 4282",
-    "NIQUE": "Bachelor's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 4316 or NURS 4163"
   },
   {
     "id": "2116",
@@ -15328,10 +15224,8 @@
     "title": "Introduction to the Research Process",
     "credit_hours": "3",
     "prerequisites": "NURS 3417 or NURS 3174",
-    "degree_level": "NURS 3300 or NURS 3003",
-    "co_requisites": "NURS 3327 or NURS 3273",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3300 or NURS 3003"
   },
   {
     "id": "2118",
@@ -15339,10 +15233,8 @@
     "title": "Nursing Informatics and the Foundation of Knowledge",
     "credit_hours": "3",
     "prerequisites": "NURS 3301 or NURS 3013",
-    "degree_level": "NURS 3326 or NURS 3263",
-    "co_requisites": "NURS 3416 or NURS 3164",
-    "RIMARY": "Bachelor's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3326 or NURS 3263"
   },
   {
     "id": "2119",
@@ -15350,9 +15242,8 @@
     "title": "Mental Health Nursing",
     "credit_hours": "3",
     "prerequisites": "NURS 3518 or NURS 3185",
-    "degree_level": "NURS 3428 or NURS 3284",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3428 or NURS 3284"
   },
   {
     "id": "2120",
@@ -15360,10 +15251,8 @@
     "title": "Community Health Nursing",
     "credit_hours": "3",
     "prerequisites": "NURS 4316 or NURS 4163",
-    "degree_level": "NURS 4318 or NURS 4183",
-    "co_requisites": "NURS 4226 or NURS 4262",
-    "RIMARY": "NURS 4228 or NURS 4282",
-    "NIQUE": "Bachelor's"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 4318 or NURS 4183"
   },
   {
     "id": "2121",
@@ -15371,9 +15260,8 @@
     "title": "Adult Health Nursing II",
     "credit_hours": "3",
     "prerequisites": "NURS 3518 or NURS 3185",
-    "degree_level": "NURS 3428 or NURS 3284",
-    "co_requisites": "Bachelor's",
-    "RIMARY": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "NURS 3428 or NURS 3284"
   },
   {
     "id": "2122",
@@ -15382,9 +15270,7 @@
     "credit_hours": "3",
     "prerequisites": "(NURS 4318 or NURS 4183) and (NURS 4316 or NURS 4163) and (NURS 4226 or NURS 4262) and (NURS 4228 or NURS 4282)",
     "degree_level": "Bachelor's",
-    "co_requisites": "NURS 4227",
-    "RIMARY": "NURS 4229",
-    "NIQUE": "NURS 4317"
+    "co_requisites": "Bachelor's"
   },
   {
     "id": "2123",
@@ -15428,10 +15314,8 @@
     "title": "Nursing Care of Special Populations: Lesbian",
     "credit_hours": "Gay",
     "prerequisites": "Bisexual",
-    "degree_level": "Transgender",
-    "co_requisites": "Queer/Questioning (LGBTQ)",
-    "RIMARY": "3",
-    "NIQUE": "(NURS 3301 or NURS 3013) and (NURS 3326 or NURS 3263) and (NURS 3416 or NURS 3164)"
+    "degree_level": "Bachelor's",
+    "co_requisites": "Transgender"
   },
   {
     "id": "2128",
@@ -15538,9 +15422,8 @@
     "title": "Advanced Health Assessment and Diagnostic Reasoning for Advanced Practice Nursing",
     "credit_hours": "3",
     "prerequisites": "(NURS 5300 or NURS 5003) and (NURS 5316 or NURS 5163) and (NURS 5314 or NURS 5133)",
-    "degree_level": "Master's",
-    "co_requisites": "NURS 5204",
-    "RIMARY": "NURS 5317"
+    "degree_level": "Bachelor's",
+    "co_requisites": "Master's"
   },
   {
     "id": "2140",
@@ -16373,12 +16256,11 @@
   {
     "id": "2249",
     "course_code": "PHYS 3324",
-    "title": "Introduction to Nuclear",
-    "credit_hours": "Particle and Radiation Physics",
-    "prerequisites": "3",
-    "degree_level": "PHYS 2326 or PHYS 2523",
-    "co_requisites": "Bachelor’s",
-    "RIMARY": "NULL"
+    "title": "Introduction to Nuclear Particle and Radiation Physics",
+    "credit_hours": "3",
+    "prerequisites": "PHYS 2326 or PHYS 2523",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2250",
@@ -16725,12 +16607,11 @@
   {
     "id": "2288",
     "course_code": "POSC 4324",
-    "title": "Race",
-    "credit_hours": "Gender and Public Policy",
-    "prerequisites": "3",
-    "degree_level": "POSC 2305 or POSC 1113",
-    "co_requisites": "Bachelor’s",
-    "RIMARY": "NULL"
+    "title": "Race Gender and Public Policy",
+    "credit_hours": "3",
+    "prerequisites": "POSC 2305 or POSC 1113",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2289",
@@ -17509,12 +17390,11 @@
   {
     "id": "2387",
     "course_code": "RDNG 5367",
-    "title": "Issues",
-    "credit_hours": "Problems and Trends in Reading",
-    "prerequisites": "3",
-    "degree_level": "NULL",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "title": "Issues Problems and Trends in Reading",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2388",
@@ -17735,13 +17615,11 @@
   {
     "id": "2412",
     "course_code": "SOWK 5207",
-    "title": "Diversity",
-    "credit_hours": "Oppression",
-    "prerequisites": "and Inclusion",
-    "degree_level": "2",
-    "co_requisites": "NULL",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Diversity Oppression and Inclusion",
+    "credit_hours": "2",
+    "prerequisites": "NULL",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2413",
@@ -17773,13 +17651,11 @@
   {
     "id": "2416",
     "course_code": "SOWK 5302",
-    "title": "Social Work Practice With Groups",
-    "credit_hours": "Organizations",
-    "prerequisites": "and Communities",
-    "degree_level": "3",
-    "co_requisites": "SOWK 5308",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Social Work Practice With Groups Organizations and Communities",
+    "credit_hours": "3",
+    "prerequisites": "SOWK 5308",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2417",
@@ -17868,9 +17744,8 @@
     "title": "Social Work Practicum and Seminar III",
     "credit_hours": "6",
     "prerequisites": "SOWK 5308",
-    "degree_level": "SOWK 5351",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "degree_level": "Master's",
+    "co_requisites": "SOWK 5351"
   },
   {
     "id": "2427",
@@ -17878,10 +17753,8 @@
     "title": "Social Work Practicum and Seminar IV",
     "credit_hours": "6",
     "prerequisites": "SOWK 5308",
-    "degree_level": "SOWK 5351",
-    "co_requisites": "SOWK 5601",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "SOWK 5351"
   },
   {
     "id": "2428",
@@ -17952,9 +17825,8 @@
     "title": "Social Work Practicum and Seminar III",
     "credit_hours": "6",
     "prerequisites": "SOWK 5308",
-    "degree_level": "SOWK 5351",
-    "co_requisites": "Master's",
-    "RIMARY": "NULL"
+    "degree_level": "Master's",
+    "co_requisites": "SOWK 5351"
   },
   {
     "id": "2436",
@@ -17962,10 +17834,8 @@
     "title": "Social Work Practicum and Seminar IV",
     "credit_hours": "6",
     "prerequisites": "SOWK 5308",
-    "degree_level": "SOWK 5351",
-    "co_requisites": "SOWK 5601",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "degree_level": "Bachelor's",
+    "co_requisites": "SOWK 5351"
   },
   {
     "id": "2437",
@@ -18078,13 +17948,11 @@
   {
     "id": "2449",
     "course_code": "SOCG 3307",
-    "title": "Conformity",
-    "credit_hours": "Deviance",
-    "prerequisites": "and Identity",
-    "degree_level": "3",
-    "co_requisites": "NULL",
-    "RIMARY": "Undergraduate",
-    "NIQUE": "NULL"
+    "title": "Conformity Deviance and Identity",
+    "credit_hours": "3",
+    "prerequisites": "NULL",
+    "degree_level": "Undergraduate",
+    "co_requisites": "NULL"
   },
   {
     "id": "2450",
@@ -18602,13 +18470,11 @@
   {
     "id": "2507",
     "course_code": "SPED 5332",
-    "title": "Assessment",
-    "credit_hours": "Diagnosis",
-    "prerequisites": "and Prescription: Professional Practice",
-    "degree_level": "3",
-    "co_requisites": "SPED 5326 or SPED 5263",
-    "RIMARY": "Master's",
-    "NIQUE": "NULL"
+    "title": "Assessment Diagnosis and Prescription: Professional Practice",
+    "credit_hours": "3",
+    "prerequisites": "SPED 5326 or SPED 5263",
+    "degree_level": "Master's",
+    "co_requisites": "NULL"
   },
   {
     "id": "2508",

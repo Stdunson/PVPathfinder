@@ -1,6 +1,3 @@
-// server.js - Backend API server for PV Pathfinder
-// This keeps your Gemini API key secure on the server side
-
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
@@ -9,50 +6,68 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize Gemini AI with API key from environment variable
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+
+// Initialize Gemini AI with API key from environment
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Middleware
-app.use(cors()); // Allow requests from React frontend
-app.use(express.json({ limit: '10mb' })); // Parse JSON bodies (increased limit for course data)
+// Helper functions
+const getRelevantCourses = (courseCatalog, profileData) => {
+  const relevantCourses = courseCatalog.filter(course => {
+    const deptMatches = 
+      (profileData.major && course.department.toLowerCase().includes(profileData.major.toLowerCase().split(' ')[0])) ||
+      (profileData.minor && course.department.toLowerCase().includes(profileData.minor.toLowerCase().split(' ')[0])) ||
+      course.department === 'General Studies' ||
+      course.code.startsWith('MATH') ||
+      course.code.startsWith('ENGL') ||
+      course.code.startsWith('HIST') ||
+      course.code.startsWith('GNST');
+    return deptMatches && course.degreeLevel === "Bachelor's";
+  });
+  return relevantCourses.slice(0, 200);
+};
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'PV Pathfinder API Server Running' });
-});
+const formatCourseCatalog = (courses) => {
+  return courses.map(c => 
+    `${c.code} - ${c.name} (${c.credits} cr) [Prereq: ${c.prerequisites}]`
+  ).join('\n');
+};
 
-// ============================================
-// RECOMMENDATIONS ENDPOINT
-// ============================================
+const formatCompletedCourses = (courses) => {
+  if (!courses || courses.length === 0) {
+    return '  - No courses completed yet';
+  }
+  return courses.map(c => 
+    `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
+  ).join('\n');
+};
+
+// API Routes
+
+// Generate course recommendations
 app.post('/api/generate-recommendations', async (req, res) => {
   try {
     const { profileData, courseCatalog } = req.body;
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const coursesList = formatCompletedCourses(profileData.courses);
+    const relevantCourses = getRelevantCourses(courseCatalog, profileData);
+    const catalogSample = formatCourseCatalog(relevantCourses);
 
-    // Validation
-    if (!profileData) {
-      return res.status(400).json({ error: 'Profile data is required' });
-    }
+    // Add concentration support
+    const concentrationInfo = profileData.concentration ? `\n- Concentration: ${profileData.concentration}` : '';
+    const concentrationGuidance = profileData.concentration 
+      ? `6. IMPORTANT: Prioritize courses that align with their concentration (${profileData.concentration}). This is a key part of their academic focus.`
+      : '6. Consider their major and minor when selecting courses';
 
-    // Format course catalog
-    const catalogSample = courseCatalog
-      .slice(0, 200)
-      .map(c => `${c.code} - ${c.name} (${c.credits} cr) [Prereq: ${c.prerequisites}]`)
-      .join('\n');
-
-    // Format completed courses
-    const coursesList = profileData.courses && profileData.courses.length > 0
-      ? profileData.courses.map(c => 
-          `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
-        ).join('\n')
-      : '  - No courses completed yet';
-
-    // Build prompt
     const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
 
 A student needs course recommendations for the next semester. Here is their information:
 
 - Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}${concentrationInfo}
 - Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
 - Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
 - Additional Notes/Constraints: ${profileData.additionalNotes || 'None'}
@@ -71,13 +86,12 @@ Based on this information, please:
 3. Explain why each course is recommended
 4. Ensure prerequisites are met based on their completed courses
 5. Consider their graduation timeline
-6. Balance the course load appropriately (typically 12-15 credits minimum for full-time students)
-7. If they have additional notes/constraints, factor those into your recommendations
+${concentrationGuidance}
+7. Balance the course load appropriately (typically 12-15 credits minimum for full-time students)
+8. If they have additional notes/constraints, factor those into your recommendations
 
 Format your response in a clear, organized way with proper headings and sections.`;
 
-    // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -85,50 +99,37 @@ Format your response in a clear, organized way with proper headings and sections
     res.json({ recommendations: text });
   } catch (error) {
     console.error('Error generating recommendations:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate recommendations',
-      details: error.message 
-    });
+    res.status(500).json({ error: 'Failed to generate recommendations' });
   }
 });
 
-// ============================================
-// ROADMAP ENDPOINT
-// ============================================
+// Generate semester roadmap
 app.post('/api/generate-roadmap', async (req, res) => {
   try {
     const { profileData, courseCatalog, previousRecommendations } = req.body;
-
-    // Validation
-    if (!profileData) {
-      return res.status(400).json({ error: 'Profile data is required' });
-    }
-
-    // Format course catalog
-    const catalogSample = courseCatalog
-      .slice(0, 200)
-      .map(c => `${c.code} - ${c.name} (${c.credits} cr) [Prereq: ${c.prerequisites}]`)
-      .join('\n');
-
-    // Format completed courses
-    const coursesList = profileData.courses && profileData.courses.length > 0
-      ? profileData.courses.map(c => 
-          `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
-        ).join('\n')
-      : '  - No courses completed yet';
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const coursesList = formatCompletedCourses(profileData.courses);
+    const relevantCourses = getRelevantCourses(courseCatalog, profileData);
+    const catalogSample = formatCourseCatalog(relevantCourses);
 
     const nextSemesterContext = previousRecommendations 
       ? `\n\nIMPORTANT: For the FIRST semester in your roadmap, you should use these recommended courses as the foundation:\n${previousRecommendations}\n\nYou may adjust slightly if needed, but try to keep the first semester consistent with these recommendations.`
       : '';
 
-    // Build prompt
+    // Add concentration support
+    const concentrationInfo = profileData.concentration ? `\n- Concentration: ${profileData.concentration}` : '';
+    const concentrationGuidance = profileData.concentration
+      ? `\n\nIMPORTANT: The student has a concentration in ${profileData.concentration}. Please ensure the roadmap includes courses that support this concentration throughout their remaining semesters.`
+      : '';
+
     const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU).
 
 Create a complete semester-by-semester roadmap for this student to graduate on time:
 
 Student Profile:
 - Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}${concentrationInfo}
 - Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
 - Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
 - Additional Notes/Requirements: ${profileData.additionalNotes || 'None'}
@@ -141,7 +142,7 @@ ${catalogSample}
 
 IMPORTANT: You MUST recommend courses from the available PVAMU course catalog above. Use the EXACT course codes and names.
 
-Pay special attention to the "Additional Notes/Requirements" - these may include scholarship requirements, work schedules, or other constraints that MUST be considered when planning the roadmap. Standard full-time enrollment is 12-15 credits per semester.${nextSemesterContext}
+Pay special attention to the "Additional Notes/Requirements" - these may include scholarship requirements, work schedules, or other constraints that MUST be considered when planning the roadmap. Standard full-time enrollment is 12-15 credits per semester.${nextSemesterContext}${concentrationGuidance}
 
 Generate a semester-by-semester plan from now until their expected graduation. For each semester, list:
 - Semester name (e.g., "Fall 2024", "Spring 2025")
@@ -180,8 +181,6 @@ Brief explanation.
 
 Use this exact format with markdown headers (##) for each semester.`;
 
-    // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -189,61 +188,44 @@ Use this exact format with markdown headers (##) for each semester.`;
     res.json({ roadmap: text });
   } catch (error) {
     console.error('Error generating roadmap:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate roadmap',
-      details: error.message 
-    });
+    res.status(500).json({ error: 'Failed to generate roadmap' });
   }
 });
 
-// ============================================
-// CHAT ENDPOINT
-// ============================================
+// Chat with advisor
 app.post('/api/chat', async (req, res) => {
   try {
     const { profileData, chatHistory, userMessage, currentRecommendations } = req.body;
+    
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const coursesList = formatCompletedCourses(profileData.courses);
+    const chatHistoryText = chatHistory.map(msg => 
+      `${msg.role === 'user' ? 'Student' : 'Advisor'}: ${msg.text}`
+    ).join('\n');
 
-    // Validation
-    if (!profileData || !userMessage) {
-      return res.status(400).json({ error: 'Profile data and user message are required' });
-    }
+    // Add concentration support
+    const concentrationInfo = profileData.concentration ? `\n- Concentration: ${profileData.concentration}` : '';
 
-    // Format completed courses
-    const coursesList = profileData.courses && profileData.courses.length > 0
-      ? profileData.courses.map(c => 
-          `  - ${c.code} - ${c.name} (${c.credits} credits, ${c.semester}, Grade: ${c.grade})`
-        ).join('\n')
-      : '  - No courses completed yet';
-
-    // Format chat history
-    const chatHistoryText = chatHistory && chatHistory.length > 0
-      ? chatHistory.map(msg => 
-          `${msg.role === 'user' ? 'Student' : 'Advisor'}: ${msg.text}`
-        ).join('\n')
-      : '';
-
-    // Build prompt
     const prompt = `You are an academic advisor for Prairie View A&M University (PVAMU). 
 
 Student Profile:
 - Name: ${profileData.name || 'Not provided'}
-- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}
+- Major: ${profileData.major || 'Not specified'}${profileData.major2 ? `\n- Second Major: ${profileData.major2}` : ''}${concentrationInfo}
 - Minor: ${profileData.minor || 'None'}${profileData.minor2 ? `\n- Second Minor: ${profileData.minor2}` : ''}
 - Expected Graduation: ${profileData.expectedGraduation || 'Not specified'}
 - Completed Courses:
 ${coursesList}
 
 Your previous recommendations:
-${currentRecommendations || 'No recommendations yet'}
+${currentRecommendations}
 
-${chatHistoryText ? `Chat History:\n${chatHistoryText}\n` : ''}
+Chat History:
+${chatHistoryText}
 
 Student's new question: ${userMessage}
 
 Provide a helpful, conversational response to their question. Keep it concise and relevant to their academic planning. Be friendly and supportive.`;
 
-    // Call Gemini API
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -251,24 +233,17 @@ Provide a helpful, conversational response to their question. Keep it concise an
     res.json({ response: text });
   } catch (error) {
     console.error('Error in chat:', error);
-    res.status(500).json({ 
-      error: 'Failed to process chat message',
-      details: error.message 
-    });
+    res.status(500).json({ error: 'Failed to process chat message' });
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ 
-    error: 'Internal server error',
-    details: err.message 
-  });
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'PV Pathfinder API Server Running' });
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 PV Pathfinder API Server running on http://localhost:${PORT}`);
-  console.log(`✅ Health check: http://localhost:${PORT}/health`);
+  console.log(`🚀 PV Pathfinder Backend running on http://localhost:${PORT}`);
+  console.log(`💡 Health check: http://localhost:${PORT}/health`);
 });
