@@ -1117,6 +1117,56 @@
   color: #6b7280;
 }
 
+
+/* Clear Data Section */
+.clear-data-section {
+  background-color: #fef2f2;
+  border: 2px solid #fca5a5;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 32px;
+}
+
+.clear-data-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #991b1b;
+  margin-bottom: 8px;
+}
+
+.clear-data-description {
+  color: #7f1d1d;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.danger-button {
+  background-color: #ef4444;
+  color: white;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.danger-button:hover {
+  background-color: #dc2626;
+  border-color: #991b1b;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  transform: translateY(-2px);
+}
+
+.danger-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  border-color: transparent;
+  transform: none;
+}
+
 /* Footer */
 .app-footer {
   background-color: white;

@@ -3,58 +3,201 @@ import './App.css';
 import ReactMarkdown from 'react-markdown';
 import Select from 'react-select';
 import * as aiService from './services/aiService';
+import { exportRecommendationsToPDF, exportRoadmapToPDF } from './utils/pdfExport';
+import { parseTextTranscript, extractStudentInfo, validateParsedCourses } from './utils/transcriptParser';
 
 const majorOptions = [
-  { value: 'Computer Science', label: 'Computer Science' },
+  // Engineering
   { value: 'Computer Engineering', label: 'Computer Engineering' },
+  { value: 'Computer Science', label: 'Computer Science' },
   { value: 'Electrical Engineering', label: 'Electrical Engineering' },
   { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
   { value: 'Civil Engineering', label: 'Civil Engineering' },
   { value: 'Chemical Engineering', label: 'Chemical Engineering' },
+  { value: 'Industrial Engineering', label: 'Industrial Engineering' },
+  
+  // Architecture & Construction
   { value: 'Architecture', label: 'Architecture' },
+  { value: 'Construction Science', label: 'Construction Science' },
+  
+  // Agriculture & Natural Resources
+  { value: 'Agriculture', label: 'Agriculture' },
+  { value: 'Agricultural Economics', label: 'Agricultural Economics' },
+  { value: 'Agribusiness', label: 'Agribusiness' },
+  { value: 'Animal Science', label: 'Animal Science' },
+  { value: 'Plant & Soil Science', label: 'Plant & Soil Science' },
+  
+  // Business
+  { value: 'Business Administration', label: 'Business Administration' },
+  { value: 'Accounting', label: 'Accounting' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Management', label: 'Management' },
+  { value: 'Management Information Systems', label: 'Management Information Systems' },
+  { value: 'Economics', label: 'Economics' },
+  
+  // Natural Sciences
   { value: 'Biology', label: 'Biology' },
   { value: 'Chemistry', label: 'Chemistry' },
   { value: 'Physics', label: 'Physics' },
   { value: 'Mathematics', label: 'Mathematics' },
+  
+  // Health & Human Services
+  { value: 'Nursing', label: 'Nursing' },
+  { value: 'Health & Human Performance', label: 'Health & Human Performance' },
+  { value: 'Kinesiology', label: 'Kinesiology' },
+  { value: 'Nutrition & Dietetics', label: 'Nutrition & Dietetics' },
+  { value: 'Social Work', label: 'Social Work' },
+  
+  // Behavioral & Social Sciences
+  { value: 'Psychology', label: 'Psychology' },
+  { value: 'Sociology', label: 'Sociology' },
+  { value: 'Criminal Justice', label: 'Criminal Justice' },
+  { value: 'Juvenile Justice', label: 'Juvenile Justice' },
+  { value: 'Political Science', label: 'Political Science' },
+  
+  // Arts & Humanities
+  { value: 'English', label: 'English' },
+  { value: 'History', label: 'History' },
+  { value: 'Communication', label: 'Communication' },
+  { value: 'Music', label: 'Music' },
+  { value: 'Art', label: 'Art' },
+  { value: 'Drama/Theatre', label: 'Drama/Theatre' },
+  { value: 'Languages', label: 'Languages' },
+  
+  // Education
+  { value: 'Education', label: 'Education' },
+  { value: 'Elementary Education', label: 'Elementary Education' },
+  { value: 'Secondary Education', label: 'Secondary Education' },
+  { value: 'Special Education', label: 'Special Education' },
+  { value: 'Kinesiology Education', label: 'Kinesiology Education' },
+  
+  // Interdisciplinary
+  { value: 'Interdisciplinary Studies', label: 'Interdisciplinary Studies' },
+  { value: 'Liberal Studies', label: 'Liberal Studies' },
+  { value: 'General Studies', label: 'General Studies' }
+];
+
+const minorOptions = [
+  // Business & Economics
+  { value: 'Business', label: 'Business' },
   { value: 'Business Administration', label: 'Business Administration' },
   { value: 'Accounting', label: 'Accounting' },
   { value: 'Finance', label: 'Finance' },
   { value: 'Marketing', label: 'Marketing' },
   { value: 'Management', label: 'Management' },
   { value: 'Economics', label: 'Economics' },
-  { value: 'Nursing', label: 'Nursing' },
-  { value: 'Psychology', label: 'Psychology' },
-  { value: 'Sociology', label: 'Sociology' },
-  { value: 'Criminal Justice', label: 'Criminal Justice' },
-  { value: 'Political Science', label: 'Political Science' },
-  { value: 'English', label: 'English' },
-  { value: 'History', label: 'History' },
-  { value: 'Communication', label: 'Communication' },
-  { value: 'Education', label: 'Education' },
-  { value: 'Social Work', label: 'Social Work' }
-];
-
-const minorOptions = [
-  { value: 'Business', label: 'Business' },
+  { value: 'Entrepreneurship', label: 'Entrepreneurship' },
+  
+  // STEM
   { value: 'Mathematics', label: 'Mathematics' },
   { value: 'Computer Science', label: 'Computer Science' },
-  { value: 'Psychology', label: 'Psychology' },
+  { value: 'Information Technology', label: 'Information Technology' },
   { value: 'Chemistry', label: 'Chemistry' },
   { value: 'Biology', label: 'Biology' },
   { value: 'Physics', label: 'Physics' },
+  { value: 'Statistics', label: 'Statistics' },
+  { value: 'Data Science', label: 'Data Science' },
+  
+  // Social & Behavioral Sciences
+  { value: 'Psychology', label: 'Psychology' },
+  { value: 'Sociology', label: 'Sociology' },
+  { value: 'Criminal Justice', label: 'Criminal Justice' },
+  { value: 'Political Science', label: 'Political Science' },
+  { value: 'Anthropology', label: 'Anthropology' },
+  { value: 'Social Work', label: 'Social Work' },
+  
+  // Arts & Humanities
   { value: 'English', label: 'English' },
   { value: 'History', label: 'History' },
-  { value: 'Political Science', label: 'Political Science' },
   { value: 'Communication', label: 'Communication' },
-  { value: 'Sociology', label: 'Sociology' },
-  { value: 'Spanish', label: 'Spanish' },
-  { value: 'French', label: 'French' },
+  { value: 'Philosophy', label: 'Philosophy' },
   { value: 'Art', label: 'Art' },
   { value: 'Music', label: 'Music' },
-  { value: 'Philosophy', label: 'Philosophy' },
-  { value: 'Criminal Justice', label: 'Criminal Justice' },
-  { value: 'Economics', label: 'Economics' },
-  { value: 'Statistics', label: 'Statistics' }
+  { value: 'Theatre', label: 'Theatre' },
+  { value: 'Creative Writing', label: 'Creative Writing' },
+  
+  // Languages
+  { value: 'Spanish', label: 'Spanish' },
+  { value: 'French', label: 'French' },
+  { value: 'German', label: 'German' },
+  { value: 'Chinese', label: 'Chinese' },
+  
+  // Health & Wellness
+  { value: 'Public Health', label: 'Public Health' },
+  { value: 'Nutrition', label: 'Nutrition' },
+  { value: 'Health Sciences', label: 'Health Sciences' },
+  { value: 'Kinesiology', label: 'Kinesiology' },
+  
+  // Other
+  { value: 'Education', label: 'Education' },
+  { value: 'Agriculture', label: 'Agriculture' },
+  { value: 'Environmental Studies', label: 'Environmental Studies' },
+  { value: 'Women\'s Studies', label: 'Women\'s Studies' },
+  { value: 'African American Studies', label: 'African American Studies' },
+  { value: 'Leadership', label: 'Leadership' },
+  { value: 'Interdisciplinary Studies', label: 'Interdisciplinary Studies' }
+];
+
+const concentrationOptions = [
+  // Computer Science concentrations
+  { value: 'Software Engineering', label: 'Software Engineering' },
+  { value: 'Cybersecurity', label: 'Cybersecurity' },
+  { value: 'Data Science', label: 'Data Science' },
+  { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
+  { value: 'Machine Learning', label: 'Machine Learning' },
+  { value: 'Web Development', label: 'Web Development' },
+  { value: 'Mobile Development', label: 'Mobile Development' },
+  { value: 'Game Development', label: 'Game Development' },
+  { value: 'Database Systems', label: 'Database Systems' },
+  { value: 'Computer Networks', label: 'Computer Networks' },
+  { value: 'Cloud Computing', label: 'Cloud Computing' },
+  
+  // Engineering concentrations
+  { value: 'Robotics', label: 'Robotics' },
+  { value: 'Power Systems', label: 'Power Systems' },
+  { value: 'Structural Engineering', label: 'Structural Engineering' },
+  { value: 'Environmental Engineering', label: 'Environmental Engineering' },
+  { value: 'Aerospace', label: 'Aerospace' },
+  { value: 'Biomedical Engineering', label: 'Biomedical Engineering' },
+  { value: 'Systems Engineering', label: 'Systems Engineering' },
+  
+  // Business concentrations
+  { value: 'Digital Marketing', label: 'Digital Marketing' },
+  { value: 'International Business', label: 'International Business' },
+  { value: 'Entrepreneurship', label: 'Entrepreneurship' },
+  { value: 'Supply Chain Management', label: 'Supply Chain Management' },
+  { value: 'Human Resources', label: 'Human Resources' },
+  { value: 'Financial Analysis', label: 'Financial Analysis' },
+  { value: 'Investment Management', label: 'Investment Management' },
+  
+  // Science concentrations
+  { value: 'Biochemistry', label: 'Biochemistry' },
+  { value: 'Molecular Biology', label: 'Molecular Biology' },
+  { value: 'Genetics', label: 'Genetics' },
+  { value: 'Microbiology', label: 'Microbiology' },
+  { value: 'Organic Chemistry', label: 'Organic Chemistry' },
+  { value: 'Theoretical Physics', label: 'Theoretical Physics' },
+  { value: 'Applied Mathematics', label: 'Applied Mathematics' },
+  { value: 'Statistics', label: 'Statistics' },
+  
+  // Psychology concentrations
+  { value: 'Clinical Psychology', label: 'Clinical Psychology' },
+  { value: 'Counseling Psychology', label: 'Counseling Psychology' },
+  { value: 'Industrial-Organizational Psychology', label: 'Industrial-Organizational Psychology' },
+  { value: 'Developmental Psychology', label: 'Developmental Psychology' },
+  
+  // Healthcare concentrations
+  { value: 'Pediatric Nursing', label: 'Pediatric Nursing' },
+  { value: 'Critical Care Nursing', label: 'Critical Care Nursing' },
+  { value: 'Psychiatric Nursing', label: 'Psychiatric Nursing' },
+  { value: 'Public Health', label: 'Public Health' },
+  
+  // Other common concentrations
+  { value: 'Project Management', label: 'Project Management' },
+  { value: 'Quality Assurance', label: 'Quality Assurance' },
+  { value: 'Research', label: 'Research' },
+  { value: 'Education Technology', label: 'Education Technology' }
 ];
 
 const graduationOptions = [
@@ -73,6 +216,33 @@ const graduationOptions = [
   { value: 'Spring 2029', label: 'Spring 2029' },
   { value: 'Summer 2029', label: 'Summer 2029' },
   { value: 'Fall 2029', label: 'Fall 2029' }
+];
+
+const semesterOptions = [
+  { value: 'Spring 2020', label: 'Spring 2020' },
+  { value: 'Summer 2020', label: 'Summer 2020' },
+  { value: 'Fall 2020', label: 'Fall 2020' },
+  { value: 'Spring 2021', label: 'Spring 2021' },
+  { value: 'Summer 2021', label: 'Summer 2021' },
+  { value: 'Fall 2021', label: 'Fall 2021' },
+  { value: 'Spring 2022', label: 'Spring 2022' },
+  { value: 'Summer 2022', label: 'Summer 2022' },
+  { value: 'Fall 2022', label: 'Fall 2022' },
+  { value: 'Spring 2023', label: 'Spring 2023' },
+  { value: 'Summer 2023', label: 'Summer 2023' },
+  { value: 'Fall 2023', label: 'Fall 2023' },
+  { value: 'Spring 2024', label: 'Spring 2024' },
+  { value: 'Summer 2024', label: 'Summer 2024' },
+  { value: 'Fall 2024', label: 'Fall 2024' },
+  { value: 'Spring 2025', label: 'Spring 2025' }
+];
+
+const gradeOptions = [
+  { value: 'A', label: 'A' },
+  { value: 'B', label: 'B' },
+  { value: 'C', label: 'C' },
+  { value: 'D', label: 'D' },
+  { value: 'F', label: 'F' }
 ];
 
 const navItems = [
@@ -158,7 +328,7 @@ function Dashboard({ onNavigate, profileData }) {
   };
   
   const gpa = calculateGPA();
-  const totalCreditsNeeded = 120;
+  const totalCreditsNeeded = profileData?.creditsRequired || 120;
   const progressPercentage = Math.min((creditsEarned / totalCreditsNeeded) * 100, 100);
   
   return (
@@ -371,16 +541,18 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
   );
 }
 
-function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, courseCatalog }) {
+function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, courseCatalog, onClearAllData }) {
   const [formData, setFormData] = useState({
     name: existingProfile?.name || '',
     major: existingProfile?.major || '',
     major2: existingProfile?.major2 || '',
     minor: existingProfile?.minor || '',
     minor2: existingProfile?.minor2 || '',
+    concentration: existingProfile?.concentration || '',
     hasDualMajor: existingProfile?.hasDualMajor || false,
     hasDualMinor: existingProfile?.hasDualMinor || false,
     expectedGraduation: existingProfile?.expectedGraduation || '',
+    creditsRequired: existingProfile?.creditsRequired || 120,
     additionalNotes: existingProfile?.additionalNotes || ''
   });
 
@@ -393,6 +565,15 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
   const [errors, setErrors] = useState({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [initialData, setInitialData] = useState(null);
+  
+  // Transcript import states
+  const [showImportOptions, setShowImportOptions] = useState(false);
+  const [showTextImport, setShowTextImport] = useState(false);
+  const [transcriptText, setTranscriptText] = useState('');
+  const [parsedCourses, setParsedCourses] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isParsingTranscript, setIsParsingTranscript] = useState(false);
+  const [parsedStudentInfo, setParsedStudentInfo] = useState(null);
 
   React.useEffect(() => {
     if (!initialData && existingProfile) {
@@ -403,9 +584,11 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
           major2: existingProfile.major2 || '',
           minor: existingProfile.minor || '',
           minor2: existingProfile.minor2 || '',
+          concentration: existingProfile.concentration || '',
           hasDualMajor: existingProfile.hasDualMajor || false,
           hasDualMinor: existingProfile.hasDualMinor || false,
           expectedGraduation: existingProfile.expectedGraduation || '',
+          creditsRequired: existingProfile.creditsRequired || 120,
           additionalNotes: existingProfile.additionalNotes || ''
         },
         courses: [...(existingProfile.courses || [])]
@@ -544,6 +727,73 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     setTimeout(() => setSaved(false), 3000);
   };
 
+  // Transcript import handlers
+
+  const handleTextParse = () => {
+    if (!transcriptText.trim()) {
+      showToast('Please paste your transcript text', 'error');
+      return;
+    }
+
+    setIsParsingTranscript(true);
+    
+    try {
+      const courses = parseTextTranscript(transcriptText);
+      const validCourses = validateParsedCourses(courses);
+      
+      if (validCourses.length === 0) {
+        showToast('No valid courses found. Please check the format.', 'error');
+        setIsParsingTranscript(false);
+        return;
+      }
+      
+      setParsedCourses(validCourses);
+      
+      // Extract student info
+      const studentInfo = extractStudentInfo(transcriptText);
+      setParsedStudentInfo(studentInfo);
+      
+      setShowPreview(true);
+      setShowTextImport(false);
+      showToast(`Found ${validCourses.length} courses!`, 'success');
+    } catch (error) {
+      console.error('Error parsing text:', error);
+      showToast('Failed to parse transcript text', 'error');
+    } finally {
+      setIsParsingTranscript(false);
+    }
+  };
+
+  const handleImportCourses = () => {
+    setCourses(prev => [...prev, ...parsedCourses]);
+    
+    // Apply parsed student info if available
+    if (parsedStudentInfo) {
+      setFormData(prev => ({
+        ...prev,
+        ...(parsedStudentInfo.name && !prev.name && { name: parsedStudentInfo.name }),
+        ...(parsedStudentInfo.major && !prev.major && { major: parsedStudentInfo.major }),
+        ...(parsedStudentInfo.concentration && !prev.concentration && { concentration: parsedStudentInfo.concentration }),
+        ...(parsedStudentInfo.expectedGraduation && !prev.expectedGraduation && { expectedGraduation: parsedStudentInfo.expectedGraduation })
+      }));
+    }
+    
+    setShowPreview(false);
+    setParsedCourses([]);
+    setParsedStudentInfo(null);
+    setTranscriptText('');
+    showToast(`Successfully imported ${parsedCourses.length} courses! Please review and adjust the auto-filled information.`, 'success');
+  };
+
+  const cancelImport = () => {
+    setShowPreview(false);
+    setShowTextImport(false);
+    setShowImportOptions(false);
+    setParsedCourses([]);
+    setParsedStudentInfo(null);
+    setTranscriptText('');
+  };
+
   return (
     <div className="profile-form">
       {saved && <div className="success-message">✓ Profile saved successfully!</div>}
@@ -641,6 +891,19 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
         )}
 
         <div className="form-group">
+          <label className="form-label">Concentration (Optional)</label>
+          <Select
+            name="concentration"
+            value={concentrationOptions.find(option => option.value === formData.concentration) || null}
+            onChange={(option) => handleSelectChange('concentration', option)}
+            options={concentrationOptions}
+            placeholder="Search or select your concentration..."
+            isClearable
+            isSearchable
+          />
+        </div>
+
+        <div className="form-group">
           <label className="form-label">Expected Graduation</label>
           <Select
             name="expectedGraduation"
@@ -654,6 +917,23 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
         </div>
 
         <div className="form-group">
+          <label className="form-label">Total Credits Required for Degree</label>
+          <input 
+            type="number" 
+            name="creditsRequired" 
+            value={formData.creditsRequired} 
+            onChange={handleInputChange} 
+            className="form-input" 
+            placeholder="120"
+            min="60"
+            max="200"
+          />
+          <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+            Most bachelor's degrees require 120 credits. Some engineering programs may require 126-130 credits. Check your degree plan.
+          </div>
+        </div>
+
+        <div className="form-group">
           <label className="form-label">Additional Notes</label>
           <input type="text" name="additionalNotes" value={formData.additionalNotes} onChange={handleInputChange} className="form-input" placeholder="Scholarship requirements, preferred schedule, etc." />
         </div>
@@ -661,6 +941,159 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
 
       <div className="form-section">
         <h3 className="section-title">Completed Courses</h3>
+        
+        {/* Import Transcript Button */}
+        {!showImportOptions && (
+          <button 
+            onClick={() => setShowImportOptions(true)} 
+            className="secondary-button" 
+            style={{ marginBottom: '16px' }}
+          >
+            📄 Import Transcript
+          </button>
+        )}
+
+        {/* Import Options */}
+        {showImportOptions && (
+          <div style={{
+            backgroundColor: '#f0f9ff',
+            border: '2px solid #3b82f6',
+            borderRadius: '8px',
+            padding: '20px',
+            marginBottom: '20px'
+          }}>
+            <h4 style={{ marginBottom: '16px', color: '#1f2937' }}>Import Transcript</h4>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+              Copy all text from your PVAMU transcript PDF and paste it below. The system will automatically extract your courses, grades, and student information.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+              <button 
+                onClick={() => setShowTextImport(!showTextImport)} 
+                className="primary-button"
+              >
+                📋 {showTextImport ? 'Hide' : 'Paste Transcript Text'}
+              </button>
+              
+              <button 
+                onClick={cancelImport} 
+                className="secondary-button"
+              >
+                Cancel
+              </button>
+            </div>
+
+            {isParsingTranscript && (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
+                <div style={{ fontSize: '14px' }}>Parsing transcript...</div>
+              </div>
+            )}
+
+            {showTextImport && !isParsingTranscript && (
+              <div style={{ marginTop: '16px' }}>
+                <div style={{ 
+                  backgroundColor: '#fef3c7', 
+                  padding: '12px', 
+                  borderRadius: '6px', 
+                  marginBottom: '12px',
+                  fontSize: '13px',
+                  color: '#92400e'
+                }}>
+                  <strong>📋 How to copy text from your PDF:</strong>
+                  <ol style={{ marginTop: '8px', marginBottom: '0', paddingLeft: '20px' }}>
+                    <li>Open your PVAMU transcript PDF</li>
+                    <li>Press Ctrl+A (or Cmd+A on Mac) to select all text</li>
+                    <li>Press Ctrl+C (or Cmd+C) to copy</li>
+                    <li>Paste below with Ctrl+V (or Cmd+V)</li>
+                  </ol>
+                </div>
+                <label className="form-label">Paste Transcript Text</label>
+                <textarea
+                  value={transcriptText}
+                  onChange={(e) => setTranscriptText(e.target.value)}
+                  className="form-input"
+                  rows="10"
+                  placeholder="Paste your transcript text here..."
+                  style={{ fontFamily: 'monospace', fontSize: '12px' }}
+                />
+                <button 
+                  onClick={handleTextParse} 
+                  className="primary-button" 
+                  style={{ marginTop: '12px' }}
+                  disabled={!transcriptText.trim()}
+                >
+                  Parse Text
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Preview Modal */}
+        {showPreview && (
+          <div className="modal-overlay" onClick={cancelImport}>
+            <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '80vh', overflow: 'auto' }}>
+              <h3 className="modal-title">Preview Imported Courses</h3>
+              
+              {parsedStudentInfo && (parsedStudentInfo.name || parsedStudentInfo.major || parsedStudentInfo.expectedGraduation) && (
+                <div style={{ 
+                  backgroundColor: '#f0fdf4', 
+                  padding: '12px', 
+                  borderRadius: '6px', 
+                  marginBottom: '16px',
+                  border: '1px solid #86efac'
+                }}>
+                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#166534', marginBottom: '8px' }}>
+                    Found Student Information:
+                  </p>
+                  {parsedStudentInfo.name && (
+                    <p style={{ fontSize: '13px', color: '#166534' }}>Name: {parsedStudentInfo.name}</p>
+                  )}
+                  {parsedStudentInfo.major && (
+                    <p style={{ fontSize: '13px', color: '#166534' }}>Major: {parsedStudentInfo.major}</p>
+                  )}
+                  {parsedStudentInfo.concentration && (
+                    <p style={{ fontSize: '13px', color: '#166534' }}>Concentration: {parsedStudentInfo.concentration}</p>
+                  )}
+                  {parsedStudentInfo.expectedGraduation && (
+                    <p style={{ fontSize: '13px', color: '#166534' }}>Graduation: {parsedStudentInfo.expectedGraduation}</p>
+                  )}
+                </div>
+              )}
+
+              <p className="modal-message">
+                Found <strong>{parsedCourses.length} courses</strong>. Review and confirm to import them.
+              </p>
+              
+              <div style={{ 
+                maxHeight: '300px', 
+                overflowY: 'auto', 
+                border: '1px solid #e5e7eb', 
+                borderRadius: '6px', 
+                padding: '12px',
+                marginBottom: '20px',
+                backgroundColor: '#f9fafb'
+              }}>
+                {parsedCourses.map((course, index) => (
+                  <div key={index} style={{ 
+                    padding: '8px', 
+                    borderBottom: '1px solid #e5e7eb',
+                    fontSize: '13px'
+                  }}>
+                    <strong>{course.code}</strong> - {course.name} ({course.credits} cr, {course.semester}, Grade: {course.grade})
+                  </div>
+                ))}
+              </div>
+
+              <div className="modal-actions">
+                <button className="modal-button secondary" onClick={cancelImport}>Cancel</button>
+                <button className="modal-button primary" style={{ backgroundColor: '#4f2d7f' }} onClick={handleImportCourses}>
+                  Import {parsedCourses.length} Courses
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="course-list">
           {courses.length === 0 ? (
@@ -699,9 +1132,6 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
                   isSearchable
                   noOptionsMessage={() => "No courses found"}
                 />
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                  Search by course code or name. Course details will auto-fill.
-                </p>
               </div>
             )}
 
@@ -746,19 +1176,29 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
 
             <div className="form-group">
               <label className="form-label">Semester Taken</label>
-              <input type="text" name="semester" value={newCourse.semester} onChange={handleCourseInputChange} className="form-input" placeholder="e.g., Fall 2023" />
+              <Select
+                name="semester"
+                value={semesterOptions.find(option => option.value === newCourse.semester) || null}
+                onChange={(option) => setNewCourse(prev => ({ ...prev, semester: option ? option.value : '' }))}
+                options={semesterOptions}
+                placeholder="Select semester..."
+                isClearable
+                isSearchable
+              />
             </div>
+            
             
             <div className="form-group">
               <label className="form-label">Grade</label>
-              <select name="grade" value={newCourse.grade} onChange={handleCourseInputChange} className="form-select">
-                <option value="">Select grade</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="F">F</option>
-              </select>
+              <Select
+                name="grade"
+                value={gradeOptions.find(option => option.value === newCourse.grade) || null}
+                onChange={(option) => setNewCourse(prev => ({ ...prev, grade: option ? option.value : '' }))}
+                options={gradeOptions}
+                placeholder="Select grade..."
+                isClearable
+                isSearchable
+              />
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={addCourse} className="primary-button">{editingCourse !== null ? 'Update Course' : 'Add Course'}</button>
@@ -771,11 +1211,29 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
       <div className="form-actions">
         <button onClick={handleSave} className={`primary-button ${saved ? 'saved' : ''}`}>{saved ? '✓ Saved!' : 'Save Profile'}</button>
       </div>
+
+      {/* Clear All Data Section */}
+      <div className="clear-data-section">
+        <h3 className="clear-data-title">⚠️ Danger Zone</h3>
+        <p className="clear-data-description">
+          Clear all your data and start over. This will permanently delete your profile, courses, recommendations, and roadmap. This action cannot be undone.
+        </p>
+        <button
+          onClick={() => {
+            if (window.confirm('Are you absolutely sure you want to delete ALL your data? This includes your profile, all courses, recommendations, and roadmap. This action CANNOT be undone!')) {
+              onClearAllData();
+            }
+          }}
+          className="danger-button"
+        >
+          🗑️ Clear All Data
+        </button>
+      </div>
     </div>
   );
 }
 
-function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGenerate, isLoading }) {
+function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGenerate, isLoading, showToast }) {
   const [recommendations, setRecommendations] = useState(savedData?.recommendations || null);
   const [chatMessages, setChatMessages] = useState(savedData?.chatMessages || []);
   const [chatInput, setChatInput] = useState('');
@@ -823,16 +1281,9 @@ function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGen
     }
   };
 
-  const handlePrint = () => window.print();
-
-  const handleExportText = () => {
-    const element = document.createElement('a');
-    const file = new Blob([recommendations], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = 'course-recommendations.txt';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const handleExportPDF = () => {
+    exportRecommendationsToPDF(recommendations, profileData);
+    showToast('PDF downloaded successfully!', 'success');
   };
 
   return (
@@ -874,8 +1325,7 @@ function Recommendations({ profileData, onNavigate, savedData, onSaveData, onGen
           </div>
 
           <div className="export-buttons">
-            <button onClick={handlePrint} className="export-button">🖨️ Print</button>
-            <button onClick={handleExportText} className="export-button">📄 Download as Text</button>
+            <button onClick={handleExportPDF} className="export-button">📄 Export PDF</button>
           </div>
 
           <div className="chat-container">
@@ -934,16 +1384,8 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
     }
   }, [savedRoadmap]);
 
-  const handlePrint = () => window.print();
-
-  const handleExportText = () => {
-    const element = document.createElement('a');
-    const file = new Blob([roadmap], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = 'semester-roadmap.txt';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  const handleExportPDF = () => {
+    exportRoadmapToPDF(roadmap, profileData);
   };
 
   return (
@@ -991,8 +1433,7 @@ function SemesterRoadmap({ profileData, onNavigate, savedRoadmap, onGenerate, is
           </div>
           
           <div className="export-buttons">
-            <button onClick={handlePrint} className="export-button">🖨️ Print</button>
-            <button onClick={handleExportText} className="export-button">📄 Download as Text</button>
+            <button onClick={handleExportPDF} className="export-button">📄 Export PDF</button>
           </div>
         </div>
       )}
@@ -1014,6 +1455,61 @@ function App() {
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedProfile = localStorage.getItem('pv_pathfinder_profile');
+      const savedRecs = localStorage.getItem('pv_pathfinder_recommendations');
+      const savedRoad = localStorage.getItem('pv_pathfinder_roadmap');
+      
+      if (savedProfile) {
+        setProfileData(JSON.parse(savedProfile));
+      }
+      if (savedRecs) {
+        setSavedRecommendations(JSON.parse(savedRecs));
+      }
+      if (savedRoad) {
+        setSavedRoadmap(JSON.parse(savedRoad));
+      }
+    } catch (error) {
+      console.error('Error loading data from localStorage:', error);
+    }
+  }, []);
+
+  // Save profile to localStorage whenever it changes
+  useEffect(() => {
+    if (profileData) {
+      try {
+        localStorage.setItem('pv_pathfinder_profile', JSON.stringify(profileData));
+      } catch (error) {
+        console.error('Error saving profile to localStorage:', error);
+        showToast('Failed to save profile locally', 'error');
+      }
+    }
+  }, [profileData]);
+
+  // Save recommendations to localStorage whenever they change
+  useEffect(() => {
+    if (savedRecommendations) {
+      try {
+        localStorage.setItem('pv_pathfinder_recommendations', JSON.stringify(savedRecommendations));
+      } catch (error) {
+        console.error('Error saving recommendations to localStorage:', error);
+      }
+    }
+  }, [savedRecommendations]);
+
+  // Save roadmap to localStorage whenever it changes
+  useEffect(() => {
+    if (savedRoadmap) {
+      try {
+        localStorage.setItem('pv_pathfinder_roadmap', JSON.stringify(savedRoadmap));
+      } catch (error) {
+        console.error('Error saving roadmap to localStorage:', error);
+      }
+    }
+  }, [savedRoadmap]);
 
   useEffect(() => {
     fetch('/pvamu_courses.json')
@@ -1109,6 +1605,26 @@ function App() {
     setHasUnsavedChanges(hasChanges);
   }, []);
 
+  const handleClearAllData = () => {
+    // Clear all state
+    setProfileData(null);
+    setTempProfileData(null);
+    setSavedRecommendations(null);
+    setSavedRoadmap(null);
+    setHasUnsavedChanges(false);
+    
+    // Clear localStorage
+    localStorage.removeItem('pv_pathfinder_profile');
+    localStorage.removeItem('pv_pathfinder_recommendations');
+    localStorage.removeItem('pv_pathfinder_roadmap');
+    
+    // Navigate to dashboard
+    setCurrentPage('dashboard');
+    
+    // Show success message
+    showToast('All data cleared successfully. Starting fresh!', 'success');
+  };
+
   const generateRecommendations = async () => {
     if (!profileData) return;
     
@@ -1152,11 +1668,11 @@ function App() {
       case 'dashboard':
         return <Dashboard onNavigate={handleNavigation} profileData={profileData} />;
       case 'profile':
-        return <ProfileForm onSaveProfile={handleSaveProfile} existingProfile={tempProfileData || profileData} showToast={showToast} onTempUpdate={handleTempProfileUpdate} courseCatalog={courseCatalog} />;
+        return <ProfileForm onSaveProfile={handleSaveProfile} existingProfile={tempProfileData || profileData} showToast={showToast} onTempUpdate={handleTempProfileUpdate} courseCatalog={courseCatalog} onClearAllData={handleClearAllData} />;
       case 'courses':
         return <CourseCatalog profileData={profileData} courseCatalog={courseCatalog} isLoadingCourses={isLoadingCourses} />;
       case 'recommendations':
-        return <Recommendations profileData={profileData} onNavigate={handleNavigation} savedData={savedRecommendations} onSaveData={setSavedRecommendations} onGenerate={generateRecommendations} isLoading={isGeneratingRecommendations} />;
+        return <Recommendations profileData={profileData} onNavigate={handleNavigation} savedData={savedRecommendations} onSaveData={setSavedRecommendations} onGenerate={generateRecommendations} isLoading={isGeneratingRecommendations} showToast={showToast} />;
       case 'roadmap':
         return <SemesterRoadmap profileData={profileData} onNavigate={handleNavigation} savedRoadmap={savedRoadmap} onGenerate={generateRoadmap} isLoading={isGeneratingRoadmap} hasRecommendations={!!savedRecommendations} />;
       default:
