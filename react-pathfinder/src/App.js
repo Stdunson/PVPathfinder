@@ -294,10 +294,21 @@ function Sidebar({ currentPage, onNavigate }) {
   );
 }
 
-function Header({ title }) {
+function Header({ title, theme, onToggleTheme }) {
   return (
     <header className="header">
-      <h2 className="header-title">{title}</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 className="header-title">{title}</h2>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button 
+            onClick={onToggleTheme}
+            className="theme-toggle-button"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
+      </div>
     </header>
   );
 }
@@ -396,7 +407,9 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [selectedLevel, setSelectedLevel] = useState('All');
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const COURSES_PER_PAGE = 99;
+  
   const departments = ['All', ...new Set(courseCatalog.map(course => course.department))].sort();
   const degreeLevels = ['All', "Bachelor's", "Master's", "Doctoral", "Executive Master's"];
 
@@ -408,6 +421,17 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
     
     return matchesSearch && matchesDepartment && matchesLevel;
   });
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDepartment, selectedLevel]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredCourses.length / COURSES_PER_PAGE);
+  const startIndex = (currentPage - 1) * COURSES_PER_PAGE;
+  const endIndex = startIndex + COURSES_PER_PAGE;
+  const coursesToDisplay = filteredCourses.slice(startIndex, endIndex);
 
   const checkPrerequisites = (course) => {
     if (!profileData?.courses || !course.prerequisites || course.prerequisites === 'None') return true;
@@ -478,15 +502,17 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
             ))}
           </select>
         </div>
+
       </div>
 
       <div className="catalog-results">
         <p className="results-count">
           {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} found
+          {totalPages > 1 && ` • Showing ${startIndex + 1}-${Math.min(endIndex, filteredCourses.length)} • Page ${currentPage} of ${totalPages}`}
         </p>
 
         <div className="courses-grid">
-          {filteredCourses.map(course => {
+          {coursesToDisplay.map(course => {
             const hasPrereqs = checkPrerequisites(course);
             
             return (
@@ -532,6 +558,41 @@ function CourseCatalog({ profileData, courseCatalog, isLoadingCourses }) {
           <div className="no-results">
             <p>No courses found matching your search criteria.</p>
             <p className="no-results-hint">Try adjusting your filters or search term.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginTop: '32px',
+            paddingTop: '24px',
+            borderTop: '1px solid var(--border-color)'
+          }}>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="secondary-button"
+              style={{ margin: 0 }}
+            >
+              ← Previous
+            </button>
+            
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: '500' }}>
+              Page {currentPage} of {totalPages}
+            </span>
+            
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="secondary-button"
+              style={{ margin: 0 }}
+            >
+              Next →
+            </button>
           </div>
         )}
       </div>
@@ -738,7 +799,7 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     setCourses(prev => prev.filter(course => course.id !== id));
   };
 
-  const validateForm = () => {
+  const validateForm = React.useCallback(() => {
     const newErrors = {};
     
     if (!formData.name.trim()) newErrors.name = 'Name is required';
@@ -748,9 +809,9 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  const handleSave = () => {
+  const handleSave = React.useCallback(() => {
     if (!validateForm()) {
       showToast('Please fill in all required fields', 'error');
       return;
@@ -767,7 +828,20 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
     setSaved(true);
     showToast('Profile saved successfully!', 'success');
     setTimeout(() => setSaved(false), 3000);
-  };
+  }, [formData, courses, onSaveProfile, showToast, validateForm]);
+
+  // Keyboard shortcut: Ctrl+S (or Cmd+S on Mac) to save profile
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
 
   // Transcript import handlers
 
@@ -1597,9 +1671,35 @@ function App() {
   const [isGeneratingRecommendations, setIsGeneratingRecommendations] = useState(false);
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
   const [toasts, setToasts] = useState([]);
+
+  const showToast = useCallback((message, type = 'info') => {
+    // Prevent duplicate toasts with same message within 1 second
+    const now = Date.now();
+    setToasts(prev => {
+      const isDuplicate = prev.some(t => 
+        t.message === message && (now - t.id < 1000)
+      );
+      
+      if (isDuplicate) return prev;
+      
+      const newToast = { id: now, message, type };
+      setTimeout(() => setToasts(p => p.filter(t => t.id !== now)), 5000);
+      return [...prev, newToast];
+    });
+  }, []);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [courseCatalog, setCourseCatalog] = useState([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+
+
+  // Dark mode theme
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('pv_pathfinder_theme');
+    return saved || 'light';
+  });
+
+  // Keyboard shortcuts help modal
+
 
   const pageTitle = navItems.find(item => item.id === currentPage)?.label || 'Dashboard';
 
@@ -1634,7 +1734,7 @@ function App() {
         showToast('Failed to save profile locally', 'error');
       }
     }
-  }, [profileData]);
+  }, [profileData, showToast]);
 
   // Save recommendations to localStorage whenever they change
   useEffect(() => {
@@ -1657,6 +1757,12 @@ function App() {
       }
     }
   }, [savedRoadmap]);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('pv_pathfinder_theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     fetch('/pvamu_courses.json')
@@ -1742,16 +1848,16 @@ function App() {
         showToast('Failed to load course catalog. Please refresh the page.', 'error');
         setIsLoadingCourses(false);
       });
-  }, []);
+  }, [showToast]);
 
-  const showToast = (message, type = 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
-  };
+
 
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const handleNavigation = (page) => {
@@ -1852,7 +1958,11 @@ function App() {
       <Sidebar currentPage={currentPage} onNavigate={handleNavigation} />
       
       <main className="main-content">
-        <Header title={pageTitle} />
+        <Header 
+          title={pageTitle} 
+          theme={theme} 
+          onToggleTheme={toggleTheme}
+        />
         <div className="content-area">{renderPage()}</div>
         <footer className="app-footer">
           © {new Date().getFullYear()} PV Pathfinder | Prairie View A&M University
@@ -1876,4 +1986,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
