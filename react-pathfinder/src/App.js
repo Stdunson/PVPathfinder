@@ -1287,21 +1287,50 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
           {courses.length === 0 ? (
             <p className="placeholder-text">No courses added yet.</p>
           ) : (
-            courses.map((course, index) => (
-              <React.Fragment key={course.id}>
-                <div className="course-item">
-                  <div className="course-info">
-                    <div className="course-code">{course.code} - {course.name}</div>
-                    <div className="course-details">{course.credits} credits • {course.semester} • Grade: {course.grade}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => editCourse(index)} className="secondary-button" style={{ padding: '6px 12px', margin: 0 }}>Edit</button>
-                    <button onClick={() => setShowDeleteConfirm(course.id)} className="remove-button">Remove</button>
-                  </div>
-                </div>
-                
-                {/* Inline Edit Form - appears right below the course being edited */}
-                {editingCourse === index && (
+            (() => {
+              // Group courses by semester
+              const coursesBySemester = {};
+              courses.forEach((course, index) => {
+                const semester = course.semester || 'No Semester';
+                if (!coursesBySemester[semester]) {
+                  coursesBySemester[semester] = [];
+                }
+                coursesBySemester[semester].push({ ...course, originalIndex: index });
+              });
+
+              // Sort semesters chronologically (Fall 2020, Spring 2021, etc.)
+              const semesterOrder = (sem) => {
+                const match = sem.match(/(Fall|Spring|Summer)\s+(\d{4})/);
+                if (!match) return 0;
+                const [, season, year] = match;
+                const seasonValue = { Spring: 0, Summer: 1, Fall: 2 }[season] || 0;
+                return parseInt(year) * 10 + seasonValue;
+              };
+
+              const sortedSemesters = Object.keys(coursesBySemester).sort((a, b) => 
+                semesterOrder(a) - semesterOrder(b)
+              );
+
+              return sortedSemesters.map(semester => (
+                <div key={semester} style={{ marginBottom: '24px' }}>
+                  <h4 className="semester-heading">{semester}</h4>
+                  {coursesBySemester[semester].map(course => (
+                    <React.Fragment key={course.id}>
+                      <div className="course-item">
+                        <div className="course-info">
+                          <div className="course-code">{course.code} - {course.name}</div>
+                          <div className="course-details">
+                            {course.credits} credits • Grade: {course.grade}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => editCourse(course.originalIndex)} className="secondary-button" style={{ padding: '6px 12px', margin: 0 }}>Edit</button>
+                          <button onClick={() => setShowDeleteConfirm(course.id)} className="remove-button">Remove</button>
+                        </div>
+                      </div>
+                      
+                      {/* Inline Edit Form - appears right below the course being edited */}
+                {editingCourse === course.originalIndex && (
                   <div className="add-course-section" style={{ marginTop: '8px', marginBottom: '16px' }}>
                     <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>Edit Course</h4>
                     
@@ -1355,7 +1384,10 @@ function ProfileForm({ onSaveProfile, existingProfile, showToast, onTempUpdate, 
                   </div>
                 )}
               </React.Fragment>
-            ))
+                  ))}
+                </div>
+              ));
+            })()
           )}
         </div>
 

@@ -364,6 +364,17 @@
   margin-top: 16px;
 }
 
+.semester-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4f2d7f;
+  margin-bottom: 12px;
+  margin-top: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #fdb913;
+  display: inline-block;
+}
+
 .course-item {
   display: flex;
   justify-content: space-between;
@@ -393,6 +404,11 @@
   font-size: 14px;
   color: var(--text-secondary);
   margin-top: 4px;
+}
+
+.course-details strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .remove-button {
@@ -1583,6 +1599,11 @@
 }
 
 /* Course item in profile */
+[data-theme="dark"] .semester-heading {
+  color: #a78bfa;
+  border-bottom-color: #fbbf24;
+}
+
 [data-theme="dark"] .course-item {
   background-color: #1f2937;
   border-color: #4b5563;
